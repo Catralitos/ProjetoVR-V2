@@ -31,7 +31,8 @@ public class GenerationManager : MonoBehaviour
     public int depthLimit = -1;
     //Tamanho da maior sala, para quando metermos as salas como se numa grid cabem todas
     public int gridSize = 10;
-
+    //Quando começa a criar as salas numa linha diferente
+    public int maxSpawnWidth = 10;
     //TODO e pelos vistos temos que ver se a sala é de gelo ou não
     //bem como qualquer outro modifier que façamos
 
@@ -60,7 +61,7 @@ public class GenerationManager : MonoBehaviour
         GameObject firstRoom = GetRandomRoot();
 
         //Instanciar essa sala
-        GameObject aux = Instantiate(firstRoom, Vector3.zero, Quaternion.identity);
+        GameObject aux = Instantiate(firstRoom, Vector3.zero, Quaternion.identity, this.gameObject.transform);
 
         //Criar raiz da árvore (depois de instanciar, porque instancia != prefab e porque só se cria o node se instanciar bem)
         treeRoot = new TreeNode<Room>(new Room(aux));
@@ -146,8 +147,8 @@ public class GenerationManager : MonoBehaviour
                 {
                     obj = GetRandomChild(direction);
                 }
-                Vector3 position = GetNewPosition();
-                if (Instantiate(obj, position, Quaternion.identity) != null)
+                Vector2 position = GetNewPosition();
+                if (Instantiate(obj, new Vector3(position.x * gridSize, 0, position.y * gridSize), Quaternion.identity, this.gameObject.transform) != null)
                 {
                     //Passar parametros aos portais do pai para fazerem bem a ligação
                     //TODO ver se da para cortar o GetComponents, e ver se isto está a chamar cada ciclo
@@ -179,7 +180,7 @@ public class GenerationManager : MonoBehaviour
                     treeNodes.Add(child);
                     //Estamos a guardar os indices logo tenho que reconverter de volta a Vector2
                     //Não faço no GetPosition porque só aqui é que dou spawn da sala
-                    roomPositions.Add(new Vector2((int)position.x / gridSize, (int)position.z / gridSize));
+                    roomPositions.Add(position);
                 }
                 else
                 {
@@ -234,9 +235,8 @@ public class GenerationManager : MonoBehaviour
     /// Vai buscar a próxima posição para onde dar spawn da sala
     /// </summary>
     /// <returns>A posição onde dar o próximo spawn</returns>
-    private Vector3 GetNewPosition()
+    private Vector2 GetNewPosition()
     {
-        Vector2 nextPos = Vector2.zero;
         //TODO ir buscar a posição.
         //melhor forma de manter isto organizado é imaginar uma grid e vamos preenchendo diagonalmente
         //imagina começar em 0,0
@@ -244,7 +244,17 @@ public class GenerationManager : MonoBehaviour
         //embora iste fique mais organizado assim, tendo em conta que mesmo impondo um limite de depth, nao sabes quantas salas ha
         //em vez de tentar fazer um quadrado limpo se calhar mais facil fazer um retangulo de largura fixa, e ir preenchendo linha a linha
         //(0,0)>(0,1)>(0,2)>(1,0)>(1,1)>(1,2)
-        return new Vector3(gridSize * nextPos.x, 0, gridSize * nextPos.y);
+;       Vector2 lastVector = roomPositions[roomPositions.Count - 1];
+        int x = 0, y = 0;
+        if (lastVector.x < maxSpawnWidth)
+        {
+            x = (int)lastVector.x + 1;
+        }
+        else
+        {
+            y = (int)lastVector.y + 1;
+        }
+        return new Vector2(x,y);
     }
 
     /// <summary>
