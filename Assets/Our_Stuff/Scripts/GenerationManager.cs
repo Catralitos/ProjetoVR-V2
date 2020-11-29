@@ -41,9 +41,9 @@ public class GenerationManager : MonoBehaviour
 
         for (int i = 1; i < lenght; i++)
         {
-            rooms[(RoomDir)i] = new List<GameObject>();
-            finalRooms[(RoomDir)i] = new List<GameObject>();
-            corridors[(RoomDir)i] = new List<GameObject>();
+            rooms.Add((RoomDir)i, new List<GameObject>());
+            finalRooms.Add((RoomDir)i, new List<GameObject>());
+            corridors.Add((RoomDir)i, new List<GameObject>());
         }
 
     }
