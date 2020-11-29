@@ -39,6 +39,7 @@ public class GenerationManager : MonoBehaviour
 
         int lenght = System.Enum.GetValues(typeof(RoomDir)).Length;
 
+        //Meter keys para cada direção no inspetor, poupar algum trabalho
         for (int i = 1; i < lenght; i++)
         {
             rooms.Add((RoomDir)i, new List<GameObject>());
@@ -143,7 +144,7 @@ public class GenerationManager : MonoBehaviour
                 //Se o corredor for o limite, ultrapassa o limite para dar spawn de uma sala final
                 if (depthLimit > -1 && (node.Level == depthLimit - 1 || node.Level == depthLimit))
                 {
-                    obj = GetFinalRoom(direction);
+                    obj = GetFinalRoom(direction, node.Data.IceRoom);
                     type = RoomType.Room;
                 }
                 else
@@ -152,7 +153,7 @@ public class GenerationManager : MonoBehaviour
                     float random = Random.Range(0, 1);
                     if (random <= 0.5)
                     {
-                        obj = GetRandomChild(direction, node.Data.IceRoom);
+                        obj = GetRandomRoom(direction, node.Data.IceRoom);
                         type = RoomType.Room;
                     }
                     else
@@ -213,11 +214,12 @@ public class GenerationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Escolhe um filho aleatóriamente que consiga ligar com aquela saida
+    /// Escolhe uma sala ao calhas
     /// </summary>
-    /// <param name="direction">Direção compativel com a saida</param>
-    /// <returns></returns>
-    private GameObject GetRandomChild(RoomDir direction, bool iceRoom)
+    /// <param name="direction">Direção de entrada na sala</param>
+    /// <param name="iceRoom">Se o pai é de gelo</param>
+    /// <returns>Prefab para instanciar</returns>
+    private GameObject GetRandomRoom(RoomDir direction, bool iceRoom)
     {
         //TODO meter isto com gelo, nao sei se é outra lista ou o que é
         List<GameObject> list = rooms[direction];
@@ -228,15 +230,24 @@ public class GenerationManager : MonoBehaviour
     /// Retorna uma sala sem saidas, para fechar o mapa
     /// </summary>
     /// <param name="direction">Direção por onde o player vai entrar na sala</param>
-    /// <returns>sala sem saidas, para fechar o mapa</returns>
-    private GameObject GetFinalRoom(RoomDir direction)
+    /// <param name="iceRoom">Se o pai é de gelo</param>
+    /// <returns>Sala sem saidas, para fechar o mapa</returns>
+    private GameObject GetFinalRoom(RoomDir direction, bool iceRoom)
     {
+        //TODO meter isto com gelo, nao sei se é outra lista ou o que é
         List<GameObject> list = finalRooms[direction];
         return list[Random.Range(0, list.Count)];
     }
 
+    /// <summary>
+    /// Retorna um corredor aleatório
+    /// </summary>
+    /// <param name="direction">Direção de entrada no corredor</param>
+    /// <param name="iceRoom">Se o pai é de gelo</param>
+    /// <returns>Prefab de um corredor para instanciar</returns>
     private GameObject GetRandomCorridor(RoomDir direction, bool iceRoom)
     {
+        //TODO meter isto com gelo, nao sei se é outra lista ou o que é
         List<GameObject> list = corridors[direction];
         return list[Random.Range(0, list.Count)];
     }
@@ -251,9 +262,7 @@ public class GenerationManager : MonoBehaviour
         //melhor forma de manter isto organizado é imaginar uma grid e vamos preenchendo diagonalmente
         //imagina começar em 0,0
         //entao a proxima posiçao vai ser (0,0)>(1,0)>(0,1)>(2,0)>(1,1)>(0,2)>(3,0)>(2,1)>(1,2)>(0,3) e assim sucessivamente
-        //embora iste fique mais organizado assim, tendo em conta que mesmo impondo um limite de depth, nao sabes quantas salas ha
-        //em vez de tentar fazer um quadrado limpo se calhar mais facil fazer um retangulo de largura fixa, e ir preenchendo linha a linha
-        //(0,0)>(0,1)>(0,2)>(1,0)>(1,1)>(1,2)
+        //mas nao consegui fazer, portanto fica assim
         ; Vector2 lastVector = roomPositions[roomPositions.Count - 1];
         int x = 0, y = 0;
         if (lastVector.x < maxSpawnWidth)

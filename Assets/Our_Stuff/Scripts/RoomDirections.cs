@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//Varias direções para ligar as salas (supostamente faltam mais)
+//Varias direções para ligar as salas 
 public enum RoomDir
 {
     Root = 0,
@@ -14,11 +14,11 @@ public enum RoomDir
 
 //Este script é para dar attach aos prefabs das salas e preencher manualmente
 public class RoomDirections : MonoBehaviour
-{ 
+{
     //Onde está o portal na sala
     //NOTA podem meter um awake neste script e fazer getcomponent para cada portal e sacar as 
     public List<RoomDir> PortalPositions { get; }
-    
+
     //Se a sala é de gelo
     public bool IceRoom { get; }
 
