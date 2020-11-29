@@ -9,11 +9,15 @@ public class Room
     //Entradas do prefab
     public List<RoomDir> PortalPositions { get; }
 
+    //Se a sala é de gelo
+    public bool IceRoom { get; }
+
     public RoomDir EntranceDirection;
-    public Room(GameObject _roomInstance)
+    public Room(GameObject _roomInstance, List<RoomDir> _PortalPositions, bool _IceRoom)
     {
         roomInstance = _roomInstance;
-        PortalPositions = roomInstance.GetComponent<RoomDirections>().PortalPositions;
+        PortalPositions = _PortalPositions;
+        IceRoom = _IceRoom;
     }
 
 }

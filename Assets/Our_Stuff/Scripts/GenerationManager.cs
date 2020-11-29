@@ -14,6 +14,8 @@ public class GenerationManager : MonoBehaviour
     public List<GameObject> finalRooms;
     //Direçoes dos portais de cada sala, para não ter que fazer GetComponent cada vez que escolher um filho
     private List<List<RoomDir>> roomDirections = new List<List<RoomDir>>();
+    //Se cada sala tem gelo, para não ter que fazer GetComponent cada vez que escolher um filho
+    private List<bool> iceRooms = new List<bool>();
     //Direçoes dos portais de cada sala final, para não ter que fazer GetComponent cada vez que escolher um filho final
     private List<List<RoomDir>> finalRoomDirections = new List<List<RoomDir>>();
     //Posições ocupadas por cada sala (grid, não espaço real, daí Vector2)
@@ -45,7 +47,9 @@ public class GenerationManager : MonoBehaviour
         //Guardar num load inicial as direções de cada sala
         foreach (GameObject room in rooms)
         {
-            roomDirections.Add(room.GetComponent<RoomDirections>().PortalPositions);
+            RoomDirections rd = room.GetComponent<RoomDirections>();
+            roomDirections.Add(rd.PortalPositions);
+            iceRooms.Add(rd.IceRoom);
         }
 
         //Guardar num load inicial as direções de cada sala final
@@ -64,7 +68,8 @@ public class GenerationManager : MonoBehaviour
         GameObject aux = Instantiate(firstRoom, Vector3.zero, Quaternion.identity, this.gameObject.transform);
 
         //Criar raiz da árvore (depois de instanciar, porque instancia != prefab e porque só se cria o node se instanciar bem)
-        treeRoot = new TreeNode<Room>(new Room(aux));
+        //TODO rever se isto do index of nao rebenta
+        treeRoot = new TreeNode<Room>(new Room(aux, roomDirections[rooms.IndexOf(firstRoom)], iceRooms[rooms.IndexOf(firstRoom)]));
 
         //Nao sei se isto é preciso, mas só quero ter a certeza que o if do SpawnChildren da direção diferente não rebenta
         treeRoot.Data.EntranceDirection = RoomDir.Root;
@@ -145,7 +150,7 @@ public class GenerationManager : MonoBehaviour
                 }
                 else
                 {
-                    obj = GetRandomChild(direction);
+                    obj = GetRandomChild(direction, node.Data.IceRoom);
                 }
                 Vector2 position = GetNewPosition();
                 if (Instantiate(obj, new Vector3(position.x * gridSize, 0, position.y * gridSize), Quaternion.identity, this.gameObject.transform) != null)
@@ -175,7 +180,8 @@ public class GenerationManager : MonoBehaviour
                             portal.SetRooms(obj, node.Data.roomInstance);
                         }
                     }
-                    TreeNode<Room> child = new TreeNode<Room>(new Room(obj), node);
+                    //TODO rever se isto do index of nao rebenta
+                    TreeNode<Room> child = new TreeNode<Room>(new Room(obj, roomDirections[rooms.IndexOf(obj)], iceRooms[rooms.IndexOf(obj)]), node);
                     child.Data.EntranceDirection = direction;
                     treeNodes.Add(child);
                     //Estamos a guardar os indices logo tenho que reconverter de volta a Vector2
@@ -204,11 +210,11 @@ public class GenerationManager : MonoBehaviour
     /// </summary>
     /// <param name="direction">Direção compativel com a saida</param>
     /// <returns></returns>
-    private GameObject GetRandomChild(RoomDir direction)
+    private GameObject GetRandomChild(RoomDir direction, bool iceRoom)
     {
         //TODO nao sei se o indexOf gasta demasiado, se calhar reescrever isto com um ciclo com i++;
         List<GameObject> list = (from room in rooms
-                                 where roomDirections[rooms.IndexOf(room)].Contains(direction)
+                                 where roomDirections[rooms.IndexOf(room)].Contains(direction) && iceRooms[rooms.IndexOf(room)] == iceRoom
                                  select room).ToList();
         return list[Random.Range(0, list.Count)];
     }

@@ -10,4 +10,9 @@ public class RoomDirections : MonoBehaviour
 { 
     //Onde está o portal na sala
     public List<RoomDir> PortalPositions { get; }
+    
+    //Se a sala é de gelo
+    public bool IceRoom { get; }
+
+
 }
