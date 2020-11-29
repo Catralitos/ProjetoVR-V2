@@ -44,7 +44,7 @@ namespace VRTK
         [Tooltip("This determines the type of movement used by the extender.")]
         public MovementFunction movementFunction = MovementFunction.LinearDirect;
         [Tooltip("This is the factor by which movement at the edge of the circle is amplified. `0` is no movement of the play area. Higher values simulate a bigger play area but may be too uncomfortable.")]
-        [Range(0, 10)]
+        [Range(-10, 10)]
         public float additionalMovementMultiplier = 1.0f;
         [Tooltip("This is the size of the circle in which the play area is not moved and everything is normal. If it is to low it becomes uncomfortable when crouching.")]
         [Range(0, 5)]

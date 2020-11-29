@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class gainStart : MonoBehaviour
 {
+    public float gain = 0.5f;
     public VRTK.VRTK_StepMultiplier step;
     private void Start()
     {

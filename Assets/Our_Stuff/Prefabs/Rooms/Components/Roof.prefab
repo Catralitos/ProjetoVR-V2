@@ -42,6 +42,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Roof_Square_01
       objectReference: {fileID: 0}
+    - target: {fileID: 1025581880042228, guid: 2f3612156fa714862a6c99eaeb4bc48b, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1887502213047874, guid: 2f3612156fa714862a6c99eaeb4bc48b, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4946359699697544, guid: 2f3612156fa714862a6c99eaeb4bc48b, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.3333

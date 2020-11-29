@@ -41,9 +41,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 121659277943006369}
     m_Modifications:
+    - target: {fileID: 1109734596416874, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1316153695050740, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
       propertyPath: m_Name
       value: Wall_Angle_01 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1316153695050740, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4436352660127536, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
       propertyPath: m_LocalPosition.x
@@ -121,9 +129,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 121659277943006369}
     m_Modifications:
+    - target: {fileID: 1109734596416874, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1316153695050740, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
       propertyPath: m_Name
       value: Wall_Angle_01 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1316153695050740, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4436352660127536, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
       propertyPath: m_LocalPosition.x
@@ -201,9 +217,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 121659277943006369}
     m_Modifications:
+    - target: {fileID: 1109734596416874, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1316153695050740, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
       propertyPath: m_Name
       value: Wall_Angle_01 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1316153695050740, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4436352660127536, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
       propertyPath: m_LocalPosition.x
@@ -281,9 +305,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 121659277943006369}
     m_Modifications:
+    - target: {fileID: 1109734596416874, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1316153695050740, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
       propertyPath: m_Name
       value: Wall_Angle_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 1316153695050740, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4436352660127536, guid: 4cd8b95e91b614e728206538b125f079, type: 3}
       propertyPath: m_LocalPosition.x

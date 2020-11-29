@@ -42,6 +42,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Floor_Square_01
       objectReference: {fileID: 0}
+    - target: {fileID: 1426837895597266, guid: 0fec0e1774acf4c9cb0522dd62f5ceb2, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1651469002730486, guid: 0fec0e1774acf4c9cb0522dd62f5ceb2, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4864367381693804, guid: 0fec0e1774acf4c9cb0522dd62f5ceb2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.5
