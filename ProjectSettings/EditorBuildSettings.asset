@@ -14,13 +14,13 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Our_Stuff/Scenes/New/Imposible Spaces + Rediected Walking.unity
     guid: efbf375820622754faacdd06e5af33cc
-  - enabled: 0
+  - enabled: 1
     path: Assets/Our_Stuff/Scenes/New/Design Rooms.unity
     guid: a4283f206c2b8b343a2e30cbfaa4dfab
   - enabled: 0
     path: Assets/Our_Stuff/Scenes/New/RDW_test.unity
     guid: 9791fbaf5f3a5e34f8db2251f068f124
-  - enabled: 1
+  - enabled: 0
     path: Assets/Our_Stuff/Scenes/New/RDW_test_v2.unity
     guid: bf61d688afe552b49bcbefe8e3a4cbb8
   m_configObjects:
