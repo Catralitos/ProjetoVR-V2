@@ -9,12 +9,16 @@ public class GenerationManager : MonoBehaviour
     public static GenerationManager instance;
 
     //Prefabs de salas de onde escolher
-    public Dictionary<RoomDir, List<GameObject>> rooms;
+    private Dictionary<RoomDir, List<GameObject>> rooms;
     //Prefabs de salas de onde escolher salas sem saida (finais)
-    public Dictionary<RoomDir, List<GameObject>> finalRooms;
+    private Dictionary<RoomDir, List<GameObject>> finalRooms;
     //Prefabs de corredores de onde escolher
-    public Dictionary<RoomDir, List<GameObject>> corridors;
+    private Dictionary<RoomDir, List<GameObject>> corridors;
 
+    //Onde vamos por as salas todas
+    public List<RoomList> roomLists;
+
+    //public List<GameObject> salas;
     //Posições ocupadas por cada sala (grid, não espaço real, daí Vector2)
     private List<Vector2> roomPositions = new List<Vector2>();
 
@@ -37,14 +41,23 @@ public class GenerationManager : MonoBehaviour
     {
         instance = this;
 
-        int lenght = System.Enum.GetValues(typeof(RoomDir)).Length;
+        int lenght = roomLists.Count;
 
         //Meter keys para cada direção no inspetor, poupar algum trabalho
-        for (int i = 1; i < lenght; i++)
+        for (int i = 0; i < lenght; i++)
         {
-            rooms.Add((RoomDir)i, new List<GameObject>());
-            finalRooms.Add((RoomDir)i, new List<GameObject>());
-            corridors.Add((RoomDir)i, new List<GameObject>());
+            if (roomLists[i].roomType == RoomType.Room)
+            {
+                rooms.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+            }
+            else if (roomLists[i].roomType == RoomType.Corridor)
+            {
+                corridors.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+            }
+            else if (roomLists[i].roomType == RoomType.Final)
+            {
+                finalRooms.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+            }
         }
 
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 //Se o prefab é uma sala ou corredor
-public enum RoomType { Room, Corridor };
+public enum RoomType { Room, Corridor, Final };
 
 public class Room
 {
