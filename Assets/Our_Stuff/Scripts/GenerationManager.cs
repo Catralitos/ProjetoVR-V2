@@ -9,15 +9,12 @@ public class GenerationManager : MonoBehaviour
     public static GenerationManager instance;
 
     //Prefabs de salas de onde escolher
-    public List<GameObject> rooms;
+    public Dictionary<RoomDir, List<GameObject>> rooms;
     //Prefabs de salas de onde escolher salas sem saida (finais)
-    public List<GameObject> finalRooms;
-    //Direçoes dos portais de cada sala, para não ter que fazer GetComponent cada vez que escolher um filho
-    private List<List<RoomDir>> roomDirections = new List<List<RoomDir>>();
-    //Se cada sala tem gelo, para não ter que fazer GetComponent cada vez que escolher um filho
-    private List<bool> iceRooms = new List<bool>();
-    //Direçoes dos portais de cada sala final, para não ter que fazer GetComponent cada vez que escolher um filho final
-    private List<List<RoomDir>> finalRoomDirections = new List<List<RoomDir>>();
+    public Dictionary<RoomDir, List<GameObject>> finalRooms;
+    //Prefabs de corredores de onde escolher
+    public Dictionary<RoomDir, List<GameObject>> corridors;
+
     //Posições ocupadas por cada sala (grid, não espaço real, daí Vector2)
     private List<Vector2> roomPositions = new List<Vector2>();
 
@@ -35,28 +32,21 @@ public class GenerationManager : MonoBehaviour
     public int gridSize = 10;
     //Quando começa a criar as salas numa linha diferente
     public int maxSpawnWidth = 10;
-    //TODO e pelos vistos temos que ver se a sala é de gelo ou não
-    //bem como qualquer outro modifier que façamos
 
     private void Awake()
     {
         instance = this;
 
-        //Acho que posso (e devo) ter este código no awake, ser der mal, depois logo se vê
+        int lenght = System.Enum.GetValues(typeof(RoomDir)).Length;
 
-        //Guardar num load inicial as direções de cada sala
-        foreach (GameObject room in rooms)
+        //Meter keys para cada direção no inspetor, poupar algum trabalho
+        for (int i = 1; i < lenght; i++)
         {
-            RoomDirections rd = room.GetComponent<RoomDirections>();
-            roomDirections.Add(rd.PortalPositions);
-            iceRooms.Add(rd.IceRoom);
+            rooms.Add((RoomDir)i, new List<GameObject>());
+            finalRooms.Add((RoomDir)i, new List<GameObject>());
+            corridors.Add((RoomDir)i, new List<GameObject>());
         }
 
-        //Guardar num load inicial as direções de cada sala final
-        foreach (GameObject room in finalRooms)
-        {
-            finalRoomDirections.Add(room.GetComponent<RoomDirections>().PortalPositions);
-        }
     }
 
     void Start()
@@ -68,11 +58,8 @@ public class GenerationManager : MonoBehaviour
         GameObject aux = Instantiate(firstRoom, Vector3.zero, Quaternion.identity, this.gameObject.transform);
 
         //Criar raiz da árvore (depois de instanciar, porque instancia != prefab e porque só se cria o node se instanciar bem)
-        //TODO rever se isto do index of nao rebenta
-        treeRoot = new TreeNode<Room>(new Room(aux, roomDirections[rooms.IndexOf(firstRoom)], iceRooms[rooms.IndexOf(firstRoom)]));
-
-        //Nao sei se isto é preciso, mas só quero ter a certeza que o if do SpawnChildren da direção diferente não rebenta
-        treeRoot.Data.EntranceDirection = RoomDir.Root;
+        //Nao sei se isto do root é preciso, mas só quero ter a certeza que o if do SpawnChildren da direção diferente não rebenta
+        treeRoot = new TreeNode<Room>(new Room(aux, RoomType.Room, RoomDir.Root));
 
         //Instanciar o player (vai ter que ser depois de instanciar a sala, não podemos pô-lo na cena no editor)
         _ = Instantiate(player, Vector3.zero, Quaternion.identity);
@@ -96,8 +83,8 @@ public class GenerationManager : MonoBehaviour
     {
         TreeNode<Room> newRoom = GetTreeNode(obj);
 
-        //Não tem filhos, e não atingiu limite, tem que instanciar filhos
-        if ((newRoom.IsLeaf && depthLimit < 0) || (newRoom.IsLeaf && depthLimit > 0 && newRoom.Level < depthLimit))
+        //Não tem filhos, tem que instanciar filhos (excepçoes tratadas no metodo em si)
+        if (newRoom.IsLeaf)
         {
             SpawnChildren(newRoom);
         }
@@ -134,65 +121,88 @@ public class GenerationManager : MonoBehaviour
     private void SpawnChildren(TreeNode<Room> node)
     {
         List<RoomDir> directions = node.Data.PortalPositions;
+        //Ja nao precisamos desse codigo porque metemos a bool Generated aliás ia dar erro se tivessemos isto
+        //Nao queremos que cries uma saida onde entraste, nao queremos dar override no que já definimos para os portais
+        //directions.Remove(node.Data.EntranceDirection);
         foreach (RoomDir direction in directions)
         {
-            //Nao queremos que cries uma saida onde entraste, nao quermos dar override no que j+a definimos para os portais
-            if (node.Data.EntranceDirection != direction)
-            {
-                GameObject obj;
-                //Ver se tem que instanciar filhos sem saida
-                //TODO possivelmente introduzir uma chance (pequena), de mesmo sem chegar ao limite dar spawn de um beco sem saida
-                //para o player ter que voltar atrás e experimentar paths diferentes
-                //mas temos que ter cuidado para não chegar o caso em que mesmo sem atingir o depth, já é tudo becos sem saida
-                if (depthLimit > -1 && node.Level == depthLimit - 1)
-                {
-                    obj = GetFinalRoom(direction);
-                }
-                else
-                {
-                    obj = GetRandomChild(direction, node.Data.IceRoom);
-                }
-                Vector2 position = GetNewPosition();
-                if (Instantiate(obj, new Vector3(position.x * gridSize, 0, position.y * gridSize), Quaternion.identity, this.gameObject.transform) != null)
-                {
-                    //Passar parametros aos portais do pai para fazerem bem a ligação
-                    //TODO ver se da para cortar o GetComponents, e ver se isto está a chamar cada ciclo
-                    //Senão buscar primeiro para uma lista e depois fazer ciclo
-                    foreach (Teleporter portal in node.Data.roomInstance.GetComponentsInChildren<Teleporter>())
-                    {
-                        //Se o pai/currente tiver 2 portais tenho de saber qual vai ligar
-                        if (portal.direction == direction)
-                        {
-                            //Vai do pai para o filho
-                            portal.SetRooms(node.Data.roomInstance, obj);
-                        }
-                    }
+            GameObject obj;
+            RoomType type;
+            //TODO possivelmente introduzir uma chance (pequena), de mesmo sem chegar ao limite dar spawn de um beco sem saida
+            //para o player ter que voltar atrás e experimentar paths diferentes
+            //mas temos que ter cuidado para não chegar o caso em que mesmo sem atingir o depth, já é tudo becos sem saida
 
-                    //Passar parametros aos portais do filho para fazerem bem a ligação
-                    //TODO ver se da para cortar o GetComponents, e ver se isto está a chamar cada ciclo
-                    //Senão buscar primeiro para uma lista e depois fazer ciclo
-                    foreach (Teleporter portal in obj.GetComponentsInChildren<Teleporter>())
-                    {
-                        //Se o filho tiver 2 portais tenho de saber para onde vai (partilham direcao)
-                        if (portal.direction == direction)
-                        {
-                            //Vai do filho para o pai
-                            portal.SetRooms(obj, node.Data.roomInstance);
-                        }
-                    }
-                    //TODO rever se isto do index of nao rebenta
-                    TreeNode<Room> child = new TreeNode<Room>(new Room(obj, roomDirections[rooms.IndexOf(obj)], iceRooms[rooms.IndexOf(obj)]), node);
-                    child.Data.EntranceDirection = direction;
-                    treeNodes.Add(child);
-                    //Estamos a guardar os indices logo tenho que reconverter de volta a Vector2
-                    //Não faço no GetPosition porque só aqui é que dou spawn da sala
-                    roomPositions.Add(position);
+            //Se for sala tem que ser corredor
+            //E vou por abaixo que se um corredor for spawned na depth final, ele consegue ainda dar spawn de uma sala final
+            if (node.Data.RoomType == RoomType.Room)
+            {
+                obj = GetRandomCorridor(direction, node.Data.IceRoom);
+                type = RoomType.Corridor;
+            }
+            else
+            {
+                //Se a próxima sala a dar spawn for no limite dá spawn de sala final
+                //Se o corredor for o limite, ultrapassa o limite para dar spawn de uma sala final
+                if (depthLimit > -1 && (node.Level == depthLimit - 1 || node.Level == depthLimit))
+                {
+                    obj = GetFinalRoom(direction, node.Data.IceRoom);
+                    type = RoomType.Room;
                 }
                 else
                 {
-                    Debug.Log("Error: Could not instantiate room at " + position);
+                    //Só ver se metade das vezes é corredor ou sala
+                    float random = Random.Range(0, 1);
+                    if (random <= 0.5)
+                    {
+                        obj = GetRandomRoom(direction, node.Data.IceRoom);
+                        type = RoomType.Room;
+                    }
+                    else
+                    {
+                        obj = GetRandomCorridor(direction, node.Data.IceRoom);
+                        type = RoomType.Corridor;
+                    }
                 }
             }
+
+            Vector2 position = GetNewPosition();
+            if (Instantiate(obj, new Vector3(position.x * gridSize, 0, position.y * gridSize), Quaternion.identity, this.gameObject.transform) != null)
+            {
+                //Passar parametros aos portais do pai para fazerem bem a ligação
+                //TODO ver se da para cortar o GetComponents
+                foreach (Teleporter portal in node.Data.roomInstance.GetComponentsInChildren<Teleporter>())
+                {
+                    //Se o pai/currente tiver 2 portais tenho de saber qual vai ligar
+                    if (!portal.Generated && portal.direction == direction)
+                    {
+                        //Vai do pai para o filho
+                        portal.SetRooms(node.Data.roomInstance, obj);
+                        portal.Generated = true;
+                    }
+                }
+
+                //Passar parametros aos portais do filho para fazerem bem a ligação
+                //TODO ver se da para cortar o GetComponents
+                foreach (Teleporter portal in obj.GetComponentsInChildren<Teleporter>())
+                {
+                    //Se o filho tiver 2 portais tenho de saber para onde vai (partilham direcao)
+                    if (!portal.Generated && portal.direction == direction)
+                    {
+                        //Vai do filho para o pai
+                        portal.SetRooms(obj, node.Data.roomInstance);
+                        portal.Generated = true;
+                    }
+                }
+                TreeNode<Room> child = new TreeNode<Room>(new Room(obj, type, direction), node);
+                treeNodes.Add(child);
+                //Não faço no GetPosition porque só aqui é que dou spawn da sala
+                roomPositions.Add(position);
+            }
+            else
+            {
+                Debug.Log("Error: Could not instantiate room at " + position);
+            }
+
         }
     }
 
@@ -202,20 +212,20 @@ public class GenerationManager : MonoBehaviour
     /// <returns> Um prefab de uma sala para servir de raiz</returns>
     private GameObject GetRandomRoot()
     {
-        return rooms[Random.Range(0, rooms.Count)];
+        List<GameObject> aux = rooms[(RoomDir)Random.Range(0, rooms.Count)];
+        return aux[Random.Range(0, aux.Count)];
     }
 
     /// <summary>
-    /// Escolhe um filho aleatóriamente que consiga ligar com aquela saida
+    /// Escolhe uma sala ao calhas
     /// </summary>
-    /// <param name="direction">Direção compativel com a saida</param>
-    /// <returns></returns>
-    private GameObject GetRandomChild(RoomDir direction, bool iceRoom)
+    /// <param name="direction">Direção de entrada na sala</param>
+    /// <param name="iceRoom">Se o pai é de gelo</param>
+    /// <returns>Prefab para instanciar</returns>
+    private GameObject GetRandomRoom(RoomDir direction, bool iceRoom)
     {
-        //TODO nao sei se o indexOf gasta demasiado, se calhar reescrever isto com um ciclo com i++;
-        List<GameObject> list = (from room in rooms
-                                 where roomDirections[rooms.IndexOf(room)].Contains(direction) && iceRooms[rooms.IndexOf(room)] == iceRoom
-                                 select room).ToList();
+        //TODO meter isto com gelo, nao sei se é outra lista ou o que é
+        List<GameObject> list = rooms[direction];
         return list[Random.Range(0, list.Count)];
     }
 
@@ -223,18 +233,26 @@ public class GenerationManager : MonoBehaviour
     /// Retorna uma sala sem saidas, para fechar o mapa
     /// </summary>
     /// <param name="direction">Direção por onde o player vai entrar na sala</param>
-    /// <returns>sala sem saidas, para fechar o mapa</returns>
-    private GameObject GetFinalRoom(RoomDir direction)
+    /// <param name="iceRoom">Se o pai é de gelo</param>
+    /// <returns>Sala sem saidas, para fechar o mapa</returns>
+    private GameObject GetFinalRoom(RoomDir direction, bool iceRoom)
     {
-        //TODO nao sei se o indexOf gasta demasiado, se calhar reescrever isto com um ciclo com i++;
-        foreach (GameObject room in finalRooms)
-        {
-            if (finalRoomDirections[finalRooms.IndexOf(room)].Contains(direction))
-            {
-                return room;
-            }
-        }
-        return null;
+        //TODO meter isto com gelo, nao sei se é outra lista ou o que é
+        List<GameObject> list = finalRooms[direction];
+        return list[Random.Range(0, list.Count)];
+    }
+
+    /// <summary>
+    /// Retorna um corredor aleatório
+    /// </summary>
+    /// <param name="direction">Direção de entrada no corredor</param>
+    /// <param name="iceRoom">Se o pai é de gelo</param>
+    /// <returns>Prefab de um corredor para instanciar</returns>
+    private GameObject GetRandomCorridor(RoomDir direction, bool iceRoom)
+    {
+        //TODO meter isto com gelo, nao sei se é outra lista ou o que é
+        List<GameObject> list = corridors[direction];
+        return list[Random.Range(0, list.Count)];
     }
 
     /// <summary>
@@ -247,10 +265,8 @@ public class GenerationManager : MonoBehaviour
         //melhor forma de manter isto organizado é imaginar uma grid e vamos preenchendo diagonalmente
         //imagina começar em 0,0
         //entao a proxima posiçao vai ser (0,0)>(1,0)>(0,1)>(2,0)>(1,1)>(0,2)>(3,0)>(2,1)>(1,2)>(0,3) e assim sucessivamente
-        //embora iste fique mais organizado assim, tendo em conta que mesmo impondo um limite de depth, nao sabes quantas salas ha
-        //em vez de tentar fazer um quadrado limpo se calhar mais facil fazer um retangulo de largura fixa, e ir preenchendo linha a linha
-        //(0,0)>(0,1)>(0,2)>(1,0)>(1,1)>(1,2)
-;       Vector2 lastVector = roomPositions[roomPositions.Count - 1];
+        //mas nao consegui fazer, portanto fica assim
+        ; Vector2 lastVector = roomPositions[roomPositions.Count - 1];
         int x = 0, y = 0;
         if (lastVector.x < maxSpawnWidth)
         {
@@ -260,7 +276,7 @@ public class GenerationManager : MonoBehaviour
         {
             y = (int)lastVector.y + 1;
         }
-        return new Vector2(x,y);
+        return new Vector2(x, y);
     }
 
     /// <summary>

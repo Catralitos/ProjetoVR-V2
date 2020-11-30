@@ -13,6 +13,13 @@ public class Teleporter : MonoBehaviour
     //Direcao do portal (preciso disto porque se uma sala tiver 2 portais, preciso de saber qual sala-filho dou link)
     public RoomDir direction;
 
+    //Se o portal já fez a ligação
+    public bool Generated { get; set; }
+
+    public void Start()
+    {
+        Generated = false;
+    }
     public void SetRooms(GameObject _InitalRoom, GameObject _DestinationRoom)
     {
         InitialRoom = _InitalRoom;
