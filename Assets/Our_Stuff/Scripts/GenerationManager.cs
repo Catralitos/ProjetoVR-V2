@@ -75,7 +75,7 @@ public class GenerationManager : MonoBehaviour
         treeRoot = new TreeNode<Room>(new Room(aux, RoomType.Room, RoomDir.Root));
 
         //Instanciar o player (vai ter que ser depois de instanciar a sala, não podemos pô-lo na cena no editor)
-        _ = Instantiate(player, Vector3.zero, Quaternion.identity);
+        _ = Instantiate(player, new Vector3(0,0.5f,0), Quaternion.identity);
 
         //Guardar a posição ocupada pela sala
         roomPositions.Add(Vector2.zero);
@@ -103,7 +103,7 @@ public class GenerationManager : MonoBehaviour
         }
 
         //Mudar os objetos ativos na cena, para optimização
-        GarbageCleanup(newRoom);
+        //GarbageCleanup(newRoom);
     }
 
     /// <summary>
