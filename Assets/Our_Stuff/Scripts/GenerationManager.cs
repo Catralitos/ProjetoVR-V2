@@ -26,8 +26,10 @@ public class GenerationManager : MonoBehaviour
     public GameObject player;
 
     //Raiz da árvore
+    [SerializeField]
     private TreeNode<Room> treeRoot;
     //Nodes todos da árvore
+    [SerializeField]
     private List<TreeNode<Room>> treeNodes = new List<TreeNode<Room>>();
 
     //-1 se nao houver limite, depois podemos meter outro valor, as este é o default
@@ -73,6 +75,7 @@ public class GenerationManager : MonoBehaviour
         //Criar raiz da árvore (depois de instanciar, porque instancia != prefab e porque só se cria o node se instanciar bem)
         //Nao sei se isto do root é preciso, mas só quero ter a certeza que o if do SpawnChildren da direção diferente não rebenta
         treeRoot = new TreeNode<Room>(new Room(aux, RoomType.Room, RoomDir.Root));
+        treeNodes.Add(treeRoot);
 
         //Instanciar o player (vai ter que ser depois de instanciar a sala, não podemos pô-lo na cena no editor)
         _ = Instantiate(player, new Vector3(0,0.5f,0), Quaternion.identity);
@@ -103,7 +106,7 @@ public class GenerationManager : MonoBehaviour
         }
 
         //Mudar os objetos ativos na cena, para optimização
-        //GarbageCleanup(newRoom);
+        GarbageCleanup(newRoom);
     }
 
     /// <summary>
@@ -116,7 +119,8 @@ public class GenerationManager : MonoBehaviour
         foreach (TreeNode<Room> room in treeNodes)
         {
             //TODO ver se as comparações depois do && funcionam
-            if (Mathf.Abs(room.Level - depth) < 2 && (newRoom.Parent == room || newRoom.HasChild(room.Data)))
+            //&& (newRoom.Parent == room || newRoom.HasChild(room.Data))
+            if (Mathf.Abs(room.Level - depth) < 2)
             {
                 room.Data.roomInstance.SetActive(true);
             }
@@ -133,10 +137,10 @@ public class GenerationManager : MonoBehaviour
     /// <param name="node">Node pai</param>
     private void SpawnChildren(TreeNode<Room> node)
     {
-        List<RoomDir> directions = node.Data.PortalPositions;
+      List<RoomDir> directions = node.Data.PortalPositions;
         //Ja nao precisamos desse codigo porque metemos a bool Generated aliás ia dar erro se tivessemos isto
         //Nao queremos que cries uma saida onde entraste, nao queremos dar override no que já definimos para os portais
-        directions.Remove(node.Data.EntranceDirection);
+        //directions.Remove(node.Data.EntranceDirection);
         foreach (RoomDir direction in directions)
         {
             GameObject obj;
@@ -185,6 +189,7 @@ public class GenerationManager : MonoBehaviour
             GameObject GenRoom = Instantiate(obj, new Vector3(position.x * gridSize, 0, position.y * gridSize), Quaternion.identity, this.gameObject.transform);
             if (GenRoom != null)
             {
+                int c = 0;
                 //Passar parametros aos portais do pai para fazerem bem a ligação
                 //TODO ver se da para cortar o GetComponents
                 foreach (Teleporter portal in node.Data.roomInstance.GetComponent<RoomDirections>().Portals)
@@ -195,6 +200,7 @@ public class GenerationManager : MonoBehaviour
                         //Vai do pai para o filho
                         portal.SetRooms(node.Data.roomInstance, GenRoom);
                         portal.Generated = true;
+                        c++;
                     }
                 }
 
@@ -208,12 +214,21 @@ public class GenerationManager : MonoBehaviour
                         //Vai do filho para o pai
                         portal.SetRooms(GenRoom, node.Data.roomInstance);
                         portal.Generated = true;
+                        c++;
                     }
                 }
-                TreeNode<Room> child = new TreeNode<Room>(new Room(GenRoom, type, direction), node);
-                treeNodes.Add(child);
-                //Não faço no GetPosition porque só aqui é que dou spawn da sala
-                roomPositions.Add(position);
+                if (c % 2 == 0)
+                {
+                    //TreeNode<Room> child = new TreeNode<Room>(new Room(GenRoom, type, direction), node);
+                    TreeNode<Room> child = node.AddChild(new Room(GenRoom, type, direction));
+                    treeNodes.Add(child);
+                    //Não faço no GetPosition porque só aqui é que dou spawn da sala
+                    roomPositions.Add(position);
+                } else
+                {
+                    Destroy(GenRoom);
+                    Debug.Log("Error: Could not instantiate room at " + position);
+                }
             }
             else
             {

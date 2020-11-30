@@ -14,12 +14,13 @@ public class Teleporter : MonoBehaviour
     public RoomDir direction;
 
     //Se o portal já fez a ligação
-    public bool Generated { get; set; }
+    public bool Generated = false;
 
+    /*
     public void Start()
     {
-        Generated = false;
-    }
+        //Generated = false;
+    }*/
     public void SetRooms(GameObject _InitalRoom, GameObject _DestinationRoom)
     {
         InitialRoom = _InitalRoom;
