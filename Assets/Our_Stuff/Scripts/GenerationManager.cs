@@ -170,7 +170,7 @@ public class GenerationManager : MonoBehaviour
             {
                 //Passar parametros aos portais do pai para fazerem bem a ligação
                 //TODO ver se da para cortar o GetComponents
-                foreach (Teleporter portal in node.Data.roomInstance.GetComponentsInChildren<Teleporter>())
+                foreach (Teleporter portal in node.Data.roomInstance.GetComponent<RoomDirections>().Portals)
                 {
                     //Se o pai/currente tiver 2 portais tenho de saber qual vai ligar
                     if (!portal.Generated && portal.direction == direction)
@@ -183,7 +183,7 @@ public class GenerationManager : MonoBehaviour
 
                 //Passar parametros aos portais do filho para fazerem bem a ligação
                 //TODO ver se da para cortar o GetComponents
-                foreach (Teleporter portal in obj.GetComponentsInChildren<Teleporter>())
+                foreach (Teleporter portal in obj.GetComponent<RoomDirections>().Portals)
                 {
                     //Se o filho tiver 2 portais tenho de saber para onde vai (partilham direcao)
                     if (!portal.Generated && portal.direction == direction)

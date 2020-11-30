@@ -16,8 +16,12 @@ public enum RoomDir
 public class RoomDirections : MonoBehaviour
 {
     //Onde está o portal na sala
-    //NOTA podem meter um awake neste script e fazer getcomponent para cada portal e sacar as 
+    //NOTA podem meter um awake neste script e fazer getcomponent para cada portal e sacar as direçoes
     public List<RoomDir> PortalPositions { get; }
+
+    //Portais da sala
+    //NOTA podem meter um awake neste script e fazer getcomponent para cada portal e sacar os portais 
+    public List<Teleporter> Portals { get; }
 
     //Se a sala é de gelo
     public bool IceRoom { get; }
