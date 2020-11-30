@@ -121,8 +121,9 @@ public class GenerationManager : MonoBehaviour
     private void SpawnChildren(TreeNode<Room> node)
     {
         List<RoomDir> directions = node.Data.PortalPositions;
+        //Ja nao precisamos desse codigo porque metemos a bool Generated aliás ia dar erro se tivessemos isto
         //Nao queremos que cries uma saida onde entraste, nao queremos dar override no que já definimos para os portais
-        directions.Remove(node.Data.EntranceDirection);
+        //directions.Remove(node.Data.EntranceDirection);
         foreach (RoomDir direction in directions)
         {
             GameObject obj;
@@ -172,10 +173,11 @@ public class GenerationManager : MonoBehaviour
                 foreach (Teleporter portal in node.Data.roomInstance.GetComponentsInChildren<Teleporter>())
                 {
                     //Se o pai/currente tiver 2 portais tenho de saber qual vai ligar
-                    if (portal.direction == direction)
+                    if (!portal.Generated && portal.direction == direction)
                     {
                         //Vai do pai para o filho
                         portal.SetRooms(node.Data.roomInstance, obj);
+                        portal.Generated = true;
                     }
                 }
 
@@ -184,10 +186,11 @@ public class GenerationManager : MonoBehaviour
                 foreach (Teleporter portal in obj.GetComponentsInChildren<Teleporter>())
                 {
                     //Se o filho tiver 2 portais tenho de saber para onde vai (partilham direcao)
-                    if (portal.direction == direction)
+                    if (!portal.Generated && portal.direction == direction)
                     {
                         //Vai do filho para o pai
                         portal.SetRooms(obj, node.Data.roomInstance);
+                        portal.Generated = true;
                     }
                 }
                 TreeNode<Room> child = new TreeNode<Room>(new Room(obj, type, direction), node);
