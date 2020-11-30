@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2531383876253204795
+--- !u!1 &4120726374017135595
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,36 +8,36 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2531383876253204933}
-  - component: {fileID: 2531383876253204794}
+  - component: {fileID: 4120726374017135381}
+  - component: {fileID: 4120726374017135594}
   m_Layer: 0
-  m_Name: Virtual World
+  m_Name: Virtual World Proper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2531383876253204933
+--- !u!4 &4120726374017135381
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2531383876253204795}
+  m_GameObject: {fileID: 4120726374017135595}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 1, z: 2}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2531383876253204794
+--- !u!114 &4120726374017135594
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2531383876253204795}
+  m_GameObject: {fileID: 4120726374017135595}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba82670f902638842ac2728b2593f269, type: 3}
@@ -85,7 +85,7 @@ MonoBehaviour:
     - {fileID: 7523120927029757424, guid: 636e47afbc4ff334fb410dc64b7b66c8, type: 3}
     - {fileID: 8025284422553617123, guid: 77f18caf19ce2a540bc8f52e48719fa6, type: 3}
   - roomType: 0
-    roomDirection: 13
+    roomDirection: 5
     rooms:
     - {fileID: 8464112229630403448, guid: c843c14c579d2c945919bb389786dc9a, type: 3}
     - {fileID: 1811527511114749045, guid: b93c8623499aed641997ef3c800c0e56, type: 3}
@@ -287,7 +287,7 @@ MonoBehaviour:
     - {fileID: 7750795167775179556, guid: 4420effff67ebcb459637cee82623ae4, type: 3}
     - {fileID: 7001010120822284502, guid: ca78a817b2358b442a2e2621e897e6b1, type: 3}
     - {fileID: 1622350980735065237, guid: 515d40020f28c884a8baf700b30989f8, type: 3}
-  player: {fileID: 0}
+  player: {fileID: 6397319338274291430, guid: 92b261e1059ed9045bfc9c52e6df9940, type: 3}
   depthLimit: -1
   gridSize: 10
   maxSpawnWidth: 10
