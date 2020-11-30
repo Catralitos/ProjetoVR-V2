@@ -18,14 +18,21 @@ public class RoomDirections : MonoBehaviour
 {
     //Onde está o portal na sala
     //NOTA podem meter um awake neste script e fazer getcomponent para cada portal e sacar as direçoes
-    public List<RoomDir> PortalPositions { get; }
+    public List<RoomDir> PortalPositions;
 
     //Portais da sala
     //NOTA podem meter um awake neste script e fazer getcomponent para cada portal e sacar os portais 
-    public List<Teleporter> Portals { get; }
+    public List<Teleporter> Portals;
 
     //Se a sala é de gelo
-    public bool IceRoom { get; }
-
+    public bool IceRoom = false;
+    private void Awake()
+    {
+        foreach(Teleporter tp in GetComponentsInChildren<Teleporter>())
+        {
+            Portals.Add(tp);
+            PortalPositions.Add(tp.direction);
+        }
+    }
 
 }
