@@ -69,8 +69,7 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
-
-
+ 
 # Windows thumbnail cache files
 Thumbs.db
 Thumbs.db:encryptable
@@ -95,4 +94,3 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-© 2020 GitHub, Inc.
