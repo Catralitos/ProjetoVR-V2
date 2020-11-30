@@ -55,6 +55,11 @@ public class TreeNode<T>
         return node;
     }
 
+    public bool Related(TreeNode<T> node)
+    {
+        return this.Parent == node || node.Parent == this || this.HasChild(node.Data) || node.HasChild(this.Data);
+    }
+
     public bool HasChild(T data)
     {
         return FindInChildren(data) != null;

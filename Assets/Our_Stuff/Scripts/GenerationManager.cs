@@ -119,7 +119,9 @@ public class GenerationManager : MonoBehaviour
         foreach (TreeNode<Room> room in treeNodes)
         {
             //TODO ver se as comparações depois do && funcionam
+            //Nao sei porque nenhuma destas funcionam
             //&& (newRoom.Parent == room || newRoom.HasChild(room.Data))
+            //&& newRoom.Related(room)
             if (Mathf.Abs(room.Level - depth) < 2)
             {
                 room.Data.roomInstance.SetActive(true);
