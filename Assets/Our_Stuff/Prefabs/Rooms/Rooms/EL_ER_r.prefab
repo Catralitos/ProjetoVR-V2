@@ -2913,6 +2913,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27a50381a36c5234c929628d88b90975, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PortalPositions: 
+  Portals: []
+  IceRoom: 0
 --- !u!1 &4981886814846618806
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,11 +9,11 @@ public class GenerationManager : MonoBehaviour
     public static GenerationManager instance;
 
     //Prefabs de salas de onde escolher
-    private Dictionary<RoomDir, List<GameObject>> rooms;
+    private Dictionary<RoomDir, List<GameObject>> rooms = new Dictionary<RoomDir, List<GameObject>>();
     //Prefabs de salas de onde escolher salas sem saida (finais)
-    private Dictionary<RoomDir, List<GameObject>> finalRooms;
+    private Dictionary<RoomDir, List<GameObject>> finalRooms = new Dictionary<RoomDir, List<GameObject>>();
     //Prefabs de corredores de onde escolher
-    private Dictionary<RoomDir, List<GameObject>> corridors;
+    private Dictionary<RoomDir, List<GameObject>> corridors = new Dictionary<RoomDir, List<GameObject>>();
 
     //Onde vamos por as salas todas
     public List<RoomList> roomLists;
@@ -136,7 +136,7 @@ public class GenerationManager : MonoBehaviour
         List<RoomDir> directions = node.Data.PortalPositions;
         //Ja nao precisamos desse codigo porque metemos a bool Generated aliás ia dar erro se tivessemos isto
         //Nao queremos que cries uma saida onde entraste, nao queremos dar override no que já definimos para os portais
-        //directions.Remove(node.Data.EntranceDirection);
+        directions.Remove(node.Data.EntranceDirection);
         foreach (RoomDir direction in directions)
         {
             GameObject obj;
@@ -182,7 +182,8 @@ public class GenerationManager : MonoBehaviour
             }
 
             Vector2 position = GetNewPosition();
-            if (Instantiate(obj, new Vector3(position.x * gridSize, 0, position.y * gridSize), Quaternion.identity, this.gameObject.transform) != null)
+            GameObject GenRoom = Instantiate(obj, new Vector3(position.x * gridSize, 0, position.y * gridSize), Quaternion.identity, this.gameObject.transform);
+            if (GenRoom != null)
             {
                 //Passar parametros aos portais do pai para fazerem bem a ligação
                 //TODO ver se da para cortar o GetComponents
@@ -192,24 +193,24 @@ public class GenerationManager : MonoBehaviour
                     if (!portal.Generated && portal.direction == direction)
                     {
                         //Vai do pai para o filho
-                        portal.SetRooms(node.Data.roomInstance, obj);
+                        portal.SetRooms(node.Data.roomInstance, GenRoom);
                         portal.Generated = true;
                     }
                 }
 
                 //Passar parametros aos portais do filho para fazerem bem a ligação
                 //TODO ver se da para cortar o GetComponents
-                foreach (Teleporter portal in obj.GetComponent<RoomDirections>().Portals)
+                foreach (Teleporter portal in GenRoom.GetComponent<RoomDirections>().Portals)
                 {
                     //Se o filho tiver 2 portais tenho de saber para onde vai (partilham direcao)
                     if (!portal.Generated && portal.direction == direction)
                     {
                         //Vai do filho para o pai
-                        portal.SetRooms(obj, node.Data.roomInstance);
+                        portal.SetRooms(GenRoom, node.Data.roomInstance);
                         portal.Generated = true;
                     }
                 }
-                TreeNode<Room> child = new TreeNode<Room>(new Room(obj, type, direction), node);
+                TreeNode<Room> child = new TreeNode<Room>(new Room(GenRoom, type, direction), node);
                 treeNodes.Add(child);
                 //Não faço no GetPosition porque só aqui é que dou spawn da sala
                 roomPositions.Add(position);
