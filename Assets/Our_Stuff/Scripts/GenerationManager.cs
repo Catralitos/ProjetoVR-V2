@@ -163,7 +163,10 @@ public class GenerationManager : MonoBehaviour
                 }
                 else
                 {
+                    obj = GetRandomRoom(direction, node.Data.IceRoom);
+                    type = RoomType.Room;
                     //Só ver se metade das vezes é corredor ou sala
+                   /*
                     float random = Random.Range(0, 1);
                     if (random <= 0.5)
                     {
@@ -174,7 +177,7 @@ public class GenerationManager : MonoBehaviour
                     {
                         obj = GetRandomCorridor(direction, node.Data.IceRoom);
                         type = RoomType.Corridor;
-                    }
+                    }*/
                 }
             }
 
@@ -225,8 +228,7 @@ public class GenerationManager : MonoBehaviour
     /// <returns> Um prefab de uma sala para servir de raiz</returns>
     private GameObject GetRandomRoot()
     {
-        List<GameObject> aux = rooms[(RoomDir)Random.Range(0, rooms.Count)];
-        return aux[Random.Range(0, aux.Count)];
+        return rooms[RoomDir.Root][Random.Range(0, rooms[RoomDir.Root].Count)];
     }
 
     /// <summary>
