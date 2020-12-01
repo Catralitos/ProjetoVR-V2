@@ -94,14 +94,17 @@ public class GenerationManager : MonoBehaviour
 
         //Instanciar essa sala
         GameObject aux = Instantiate(firstRoom, Vector3.zero, Quaternion.identity, this.gameObject.transform);
-
+        Debug.Log("Instanciou a sala " + aux);
         //Criar raiz da árvore (depois de instanciar, porque instancia != prefab e porque só se cria o node se instanciar bem)
         //Nao sei se isto do root é preciso, mas só quero ter a certeza que o if do SpawnChildren da direção diferente não rebenta
-        treeRoot = new TreeNode<Room>(new Room(aux, RoomType.Room, RoomDir.Root));
+        treeRoot = new TreeNode<Room>(new Room(aux, RoomType.Room, RoomDir.Root, iceRoot));
+        Debug.Log("Criou a raiz");
         treeNodes.Add(treeRoot);
+        Debug.Log("Meteu a raiz na lista");
 
         //Instanciar o player (vai ter que ser depois de instanciar a sala, não podemos pô-lo na cena no editor)
         _ = Instantiate(player, new Vector3(0, 0.5f, 0), Quaternion.identity);
+        Debug.Log("Instanciou o player");
 
         //Guardar a posição ocupada pela sala
         roomPositions.Add(Vector2.zero);
@@ -167,6 +170,7 @@ public class GenerationManager : MonoBehaviour
         {
             GameObject obj;
             RoomType type;
+            bool ice = false;
 
             //Sala normal (não interessa ser de gelo o GetRandomCorridor vai à lista correcta)
             if (parent.Data.RoomType == RoomType.Room)
@@ -195,6 +199,7 @@ public class GenerationManager : MonoBehaviour
                 {
                     obj = GetRandomCorridor(direction, parent);
                     type = RoomType.Corridor;
+                    ice = true;
                 }
                 //Se não for de gelo não liga
                 else
@@ -244,7 +249,7 @@ public class GenerationManager : MonoBehaviour
                 }
                 if (c % 2 == 0)
                 {
-                    TreeNode<Room> child = parent.AddChild(new Room(GenRoom, type, direction));
+                    TreeNode<Room> child = parent.AddChild(new Room(GenRoom, type, direction, ice));
                     treeNodes.Add(child);
                     //Não faço no GetPosition porque só aqui é que dou spawn da sala
                     roomPositions.Add(position);

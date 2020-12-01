@@ -25,7 +25,7 @@ public class RoomDirections : MonoBehaviour
     public List<Teleporter> Portals;
 
     //Se a sala é de gelo
-    public bool IceRoom = false;
+    //public bool IceRoom = false;
     private void Awake()
     {
         foreach(Teleporter tp in GetComponentsInChildren<Teleporter>())
