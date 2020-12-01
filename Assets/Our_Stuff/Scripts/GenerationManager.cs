@@ -129,7 +129,7 @@ public class GenerationManager : MonoBehaviour
         }
 
         //Mudar os objetos ativos na cena, para optimização
-        //GarbageCleanup(newRoom);
+        GarbageCleanup(newRoom);
     }
 
     /// <summary>
