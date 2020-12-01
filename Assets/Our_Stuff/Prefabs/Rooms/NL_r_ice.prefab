@@ -4668,6 +4668,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7787462748780900603}
+  - component: {fileID: -8951158835355259779}
   m_Layer: 0
   m_Name: NL_r_ice
   m_TagString: Untagged
@@ -4700,6 +4701,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-8951158835355259779
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7787462748780900596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27a50381a36c5234c929628d88b90975, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PortalPositions: 
+  Portals: []
+  IceRoom: 1
 --- !u!1 &7861443702206192389
 GameObject:
   m_ObjectHideFlags: 0
