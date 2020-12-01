@@ -8,6 +8,9 @@ public class GenerationManager : MonoBehaviour
     //Isto é para o teleporter conseguir encontrar o Manager facilmente
     public static GenerationManager instance;
 
+    //Onde vamos por as salas todas no inspetor
+    public List<RoomList> roomLists;
+
     //Prefabs de salas de onde escolher
     private Dictionary<RoomDir, List<GameObject>> rooms = new Dictionary<RoomDir, List<GameObject>>();
     //Prefabs de salas de onde escolher salas sem saida (finais)
@@ -16,11 +19,11 @@ public class GenerationManager : MonoBehaviour
     private Dictionary<RoomDir, List<GameObject>> corridors = new Dictionary<RoomDir, List<GameObject>>();
     //Prefabs de corredores finais de onde escohler
     private Dictionary<RoomDir, List<GameObject>> finalCorridors = new Dictionary<RoomDir, List<GameObject>>();
+    //Prefabs de salas de gelo onde escolher
+    private Dictionary<RoomDir, List<GameObject>> iceRooms = new Dictionary<RoomDir, List<GameObject>>();
+    //Prefabs de corredores de gelo onde escolher
+    private Dictionary<RoomDir, List<GameObject>> iceCorridors = new Dictionary<RoomDir, List<GameObject>>();
 
-    //Onde vamos por as salas todas
-    public List<RoomList> roomLists;
-
-    //public List<GameObject> salas;
     //Posições ocupadas por cada sala (grid, não espaço real, daí Vector2)
     private List<Vector2> roomPositions = new List<Vector2>();
 
@@ -28,10 +31,8 @@ public class GenerationManager : MonoBehaviour
     public GameObject player;
 
     //Raiz da árvore
-    [SerializeField]
     private TreeNode<Room> treeRoot;
     //Nodes todos da árvore
-    [SerializeField]
     private List<TreeNode<Room>> treeNodes = new List<TreeNode<Room>>();
 
     //-1 se nao houver limite, depois podemos meter outro valor, as este é o default
@@ -40,6 +41,8 @@ public class GenerationManager : MonoBehaviour
     public int gridSize = 10;
     //Quando começa a criar as salas numa linha diferente
     public int maxSpawnWidth = 10;
+    //Se começo com gelo
+    public bool iceRoot = false;
 
     private void Awake()
     {
@@ -52,11 +55,25 @@ public class GenerationManager : MonoBehaviour
         {
             if (roomLists[i].roomType == RoomType.Room)
             {
-                rooms.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+                if (roomLists[i].IceRooms)
+                {
+                    iceRooms.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+                }
+                else
+                {
+                    rooms.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+                }
             }
             else if (roomLists[i].roomType == RoomType.Corridor)
             {
-                corridors.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+                if (roomLists[i].IceRooms)
+                {
+                    iceCorridors.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+                }
+                else
+                {
+                    corridors.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+                }
             }
             else if (roomLists[i].roomType == RoomType.Final)
             {
@@ -73,7 +90,7 @@ public class GenerationManager : MonoBehaviour
     void Start()
     {
         //Escolher primeira sala aleatoriamente
-        GameObject firstRoom = GetRandomRoot();
+        GameObject firstRoom = GetRandomRoot(iceRoot);
 
         //Instanciar essa sala
         GameObject aux = Instantiate(firstRoom, Vector3.zero, Quaternion.identity, this.gameObject.transform);
@@ -151,7 +168,7 @@ public class GenerationManager : MonoBehaviour
             GameObject obj;
             RoomType type;
 
-            //Sala normal
+            //Sala normal (não interessa ser de gelo o GetRandomCorridor vai à lista correcta)
             if (parent.Data.RoomType == RoomType.Room)
             {
                 //Se a sala for a penultima em depth nao pode dar spawn de uma sala final a seguir
@@ -190,7 +207,7 @@ public class GenerationManager : MonoBehaviour
             else
             {
                 //Buscar uma sala final
-                obj = GetFinalRoom(direction, parent.Data.IceRoom);
+                obj = GetFinalRoom(direction);
                 type = RoomType.Room;
             }
             Vector2 position = GetNewPosition();
@@ -252,8 +269,12 @@ public class GenerationManager : MonoBehaviour
     /// Vai buscar uma sala qualquer para raiz
     /// </summary>
     /// <returns> Um prefab de uma sala para servir de raiz</returns>
-    private GameObject GetRandomRoot()
+    private GameObject GetRandomRoot(bool iceRoot)
     {
+        if (iceRoot)
+        {
+            return iceRooms[RoomDir.Root][Random.Range(0, rooms[RoomDir.Root].Count)];
+        }
         return rooms[RoomDir.Root][Random.Range(0, rooms[RoomDir.Root].Count)];
     }
 
@@ -261,7 +282,6 @@ public class GenerationManager : MonoBehaviour
     /// Escolhe uma sala ao calhas
     /// </summary>
     /// <param name="direction">Direção de entrada na sala</param>
-    /// <param name="iceRoom">Se o pai é de gelo</param>
     /// <returns>Prefab para instanciar</returns>
     private GameObject GetRandomRoom(RoomDir direction)
     {
@@ -275,7 +295,7 @@ public class GenerationManager : MonoBehaviour
     /// <param name="direction">Direção por onde o player vai entrar na sala</param>
     /// <param name="iceRoom">Se o pai é de gelo</param>
     /// <returns>Sala sem saidas, para fechar o mapa</returns>
-    private GameObject GetFinalRoom(RoomDir direction, bool iceRoom)
+    private GameObject GetFinalRoom(RoomDir direction)
     {
         //TODO meter isto com gelo, nao sei se é outra lista ou o que é
         List<GameObject> list = finalRooms[direction];
@@ -290,39 +310,26 @@ public class GenerationManager : MonoBehaviour
     /// <returns>Prefab de um corredor para instanciar</returns>
     private GameObject GetRandomCorridor(RoomDir direction, TreeNode<Room> parent)
     {
-        List<GameObject> list;
-        List<GameObject> aux = corridors[direction];
-
         //Só retorna corredor de gelo se o pai for sala de gelo
         if (parent.Data.IceRoom && parent.Data.RoomType == RoomType.Room)
         {
-            list = (from item in aux
-                    where item.GetComponent<RoomDirections>().IceRoom
-                    select item).ToList();
+            return iceCorridors[direction][Random.Range(0, iceCorridors.Count)];
         }
         else
         {
-            list = aux;
+            return corridors[direction][Random.Range(0, corridors.Count)];
         }
-        return list[Random.Range(0, list.Count)];
     }
 
-    private GameObject GetRandomFinalCorridor(RoomDir direction, TreeNode<Room> parent)
+    //Ainda nao pus para dar gelo
+    /// <summary>
+    /// Retorna um corredor que tem que vir obrigatóriamente antes de uma sala final
+    /// </summary>
+    /// <param name="direction">Direção de entrada no corredor</param>
+    /// <returns>Corredor final</returns>
+    private GameObject GetRandomFinalCorridor(RoomDir direction)
     {
-        List<GameObject> list;
-        List<GameObject> aux = finalCorridors[direction];
-
-        if (parent.Data.IceRoom && parent.Data.RoomType == RoomType.Room)
-        {
-            list = (from item in aux
-                    where item.GetComponent<RoomDirections>().IceRoom
-                    select item).ToList();
-        }
-        else
-        {
-            list = aux;
-        }
-        return list[Random.Range(0, list.Count)];
+        return finalCorridors[direction][Random.Range(0, finalCorridors[direction].Count)];
     }
 
     /// <summary>
