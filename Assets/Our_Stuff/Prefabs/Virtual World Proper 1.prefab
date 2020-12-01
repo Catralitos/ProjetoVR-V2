@@ -339,4 +339,4 @@ MonoBehaviour:
   depthLimit: -1
   gridSize: 10
   maxSpawnWidth: 2
-  iceRoot: 1
+  iceRoot: 0
