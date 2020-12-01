@@ -306,7 +306,7 @@ PrefabInstance:
     - target: {fileID: 7286117428653939524, guid: 46a78bd0229b5974daa7afb0604435e8,
         type: 3}
       propertyPath: iceRoot
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7286117428653939525, guid: 46a78bd0229b5974daa7afb0604435e8,
         type: 3}
