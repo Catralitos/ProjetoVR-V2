@@ -189,6 +189,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6397319338274291430, guid: 92b261e1059ed9045bfc9c52e6df9940,
         type: 3}
+    - target: {fileID: 4120726374017135594, guid: 9a3efd83197da814eafe795f0da556c0,
+        type: 3}
+      propertyPath: maxSpawnWidth
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4120726374017135595, guid: 9a3efd83197da814eafe795f0da556c0,
         type: 3}
       propertyPath: m_Name

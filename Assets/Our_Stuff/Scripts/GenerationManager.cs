@@ -188,13 +188,14 @@ public class GenerationManager : MonoBehaviour
             }
 
             Vector2 position = GetNewPosition();
-            GameObject GenRoom = Instantiate(obj, new Vector3(position.x * gridSize, 0, position.y * gridSize), Quaternion.identity, this.gameObject.transform);
+            GameObject GenRoom = Instantiate(obj, new Vector3(position.y * gridSize, 0, position.x * gridSize), Quaternion.identity, this.gameObject.transform);
             if (GenRoom != null)
             {
                 int c = 0;
                 //Passar parametros aos portais do pai para fazerem bem a ligação
                 //TODO ver se da para cortar o GetComponents
-                foreach (Teleporter portal in node.Data.roomInstance.GetComponent<RoomDirections>().Portals)
+                List<Teleporter> parentPortals = node.Data.roomInstance.GetComponent<RoomDirections>().Portals;
+                foreach (Teleporter portal in parentPortals)
                 {
                     //Se o pai/currente tiver 2 portais tenho de saber qual vai ligar
                     if (!portal.Generated && portal.direction == direction)
@@ -208,7 +209,8 @@ public class GenerationManager : MonoBehaviour
 
                 //Passar parametros aos portais do filho para fazerem bem a ligação
                 //TODO ver se da para cortar o GetComponents
-                foreach (Teleporter portal in GenRoom.GetComponent<RoomDirections>().Portals)
+                List<Teleporter> childPortals = GenRoom.GetComponent<RoomDirections>().Portals;
+                foreach (Teleporter portal in childPortals)
                 {
                     //Se o filho tiver 2 portais tenho de saber para onde vai (partilham direcao)
                     if (!portal.Generated && portal.direction == direction)
@@ -229,12 +231,14 @@ public class GenerationManager : MonoBehaviour
                 } else
                 {
                     Destroy(GenRoom);
-                    Debug.Log("Error: Could not instantiate room at " + position);
+                    Debug.Log("(C impar) " + direction);
+                    Debug.Log("Error: Could not instantiate room at " + new Vector3(position.y * gridSize, 0, position.x * gridSize));
                 }
             }
             else
             {
-                Debug.Log("Error: Could not instantiate room at " + position);
+                Debug.Log("(Spawn nao deu) " + direction);
+                Debug.Log("Error: Could not instantiate room at " + new Vector3(position.y * gridSize, 0, position.x * gridSize));
             }
 
         }
@@ -294,22 +298,16 @@ public class GenerationManager : MonoBehaviour
     /// <returns>A posição onde dar o próximo spawn</returns>
     private Vector2 GetNewPosition()
     {
-        //TODO ir buscar a posição.
-        //melhor forma de manter isto organizado é imaginar uma grid e vamos preenchendo diagonalmente
-        //imagina começar em 0,0
-        //entao a proxima posiçao vai ser (0,0)>(1,0)>(0,1)>(2,0)>(1,1)>(0,2)>(3,0)>(2,1)>(1,2)>(0,3) e assim sucessivamente
-        //mas nao consegui fazer, portanto fica assim
-        ; Vector2 lastVector = roomPositions[roomPositions.Count - 1];
-        int x = 0, y = 0;
+        //supostamente faz (0,0), (1,0), (2,0) e quando chega aos 10, sobe de linha
+        Vector2 lastVector = roomPositions[roomPositions.Count - 1];
         if (lastVector.x < maxSpawnWidth)
         {
-            x = (int)lastVector.x + 1;
+            return lastVector + Vector2.right;
         }
         else
         {
-            y = (int)lastVector.y + 1;
+            return new Vector2(0, lastVector.y + 1);
         }
-        return new Vector2(x, y);
     }
 
     /// <summary>
