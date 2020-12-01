@@ -1665,7 +1665,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   InitialRoom: {fileID: 0}
   DestinationRoom: {fileID: 0}
-  direction: 8
+  direction: 14
+  Generated: 0
 --- !u!1 &2806207351150264317
 GameObject:
   m_ObjectHideFlags: 0
@@ -2205,7 +2206,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   InitialRoom: {fileID: 0}
   DestinationRoom: {fileID: 0}
-  direction: 7
+  direction: 9
+  Generated: 0
 --- !u!1 &3830342628944498352
 GameObject:
   m_ObjectHideFlags: 0
