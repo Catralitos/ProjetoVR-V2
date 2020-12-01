@@ -273,7 +273,7 @@ public class GenerationManager : MonoBehaviour
     {
         if (iceRoot)
         {
-            return iceRooms[RoomDir.Root][Random.Range(0, rooms[RoomDir.Root].Count)];
+            return iceRooms[RoomDir.Root][Random.Range(0, iceRooms[RoomDir.Root].Count)];
         }
         return rooms[RoomDir.Root][Random.Range(0, rooms[RoomDir.Root].Count)];
     }
@@ -297,9 +297,7 @@ public class GenerationManager : MonoBehaviour
     /// <returns>Sala sem saidas, para fechar o mapa</returns>
     private GameObject GetFinalRoom(RoomDir direction)
     {
-        //TODO meter isto com gelo, nao sei se é outra lista ou o que é
-        List<GameObject> list = finalRooms[direction];
-        return list[Random.Range(0, list.Count)];
+        return finalRooms[direction][Random.Range(0, finalRooms[direction].Count)];
     }
 
     /// <summary>
