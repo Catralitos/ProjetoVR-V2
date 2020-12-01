@@ -166,12 +166,13 @@ public class GenerationManager : MonoBehaviour
     private void SpawnChildren(TreeNode<Room> parent)
     {
         List<RoomDir> directions = parent.Data.PortalPositions;
+        directions.Remove(parent.Data.EntranceDirection);
         foreach (RoomDir direction in directions)
         {
             GameObject obj;
             RoomType type;
             bool ice = false;
-            bool dontBother = false;
+            //bool dontBother = false;
             //Sala normal (não interessa ser de gelo o GetRandomCorridor vai à lista correcta)
             if (parent.Data.RoomType == RoomType.Room)
             {
@@ -185,7 +186,7 @@ public class GenerationManager : MonoBehaviour
                 //Senão escolhe um corredor ao calhas
                 else
                 {
-                    //Só retorna corredor de gelo se o pai for sala de gelo
+                    //Só vai buscar corredor de gelo se o pai for sala de gelo
                     if (parent.Data.IceRoom && parent.Data.RoomType == RoomType.Room)
                     {
                         obj = GetRandomIceCorridor(direction);
@@ -204,7 +205,6 @@ public class GenerationManager : MonoBehaviour
             else if (parent.Data.RoomType == RoomType.Corridor)
             {
                 //Se o corredor for de gelo, vai buscar um corredor normal
-                //O método em si só retorna corredores de gelo se parent for sala de gelo
                 if (parent.Data.IceRoom)
                 {
                     obj = GetRandomCorridor(direction);
@@ -213,19 +213,8 @@ public class GenerationManager : MonoBehaviour
                 //Se não for de gelo não liga
                 else
                 {
-                    if (direction != RoomDir.C)
-                    {
-                        obj = GetRandomRoom(direction);
-                        type = RoomType.Room;
-                    }
-                    else
-                    {
-                        //quando ele vier de C, é normal nao tentar porque rooms[C] rebenta
-                        obj = null;
-                        type = RoomType.Room;
-                        dontBother = true;
-                    }
-
+                    obj = GetRandomRoom(direction);
+                    type = RoomType.Room;
                 }
             }
             //Final corridor
@@ -235,61 +224,42 @@ public class GenerationManager : MonoBehaviour
                 obj = GetFinalRoom(direction);
                 type = RoomType.Room;
             }
-            if (!dontBother)
+            Vector2 position = GetNewPosition();
+            GameObject GenRoom = Instantiate(obj, new Vector3(position.y * gridSize, 0, position.x * gridSize), Quaternion.identity, this.gameObject.transform);
+            if (GenRoom != null)
             {
-                Vector2 position = GetNewPosition();
-                GameObject GenRoom = Instantiate(obj, new Vector3(position.y * gridSize, 0, position.x * gridSize), Quaternion.identity, this.gameObject.transform);
-                if (GenRoom != null)
+                //Passar parametros aos portais do pai para fazerem bem a ligação
+                List<Teleporter> parentPortals = parent.Data.roomInstance.GetComponent<RoomDirections>().Portals;
+                foreach (Teleporter portal in parentPortals)
                 {
-                    int c = 0;
-                    //Passar parametros aos portais do pai para fazerem bem a ligação
-                    List<Teleporter> parentPortals = parent.Data.roomInstance.GetComponent<RoomDirections>().Portals;
-                    foreach (Teleporter portal in parentPortals)
+                    //Se o pai/currente tiver 2 portais tenho de saber qual vai ligar
+                    if (portal.direction == direction)
                     {
-                        //Se o pai/currente tiver 2 portais tenho de saber qual vai ligar
-                        if (!portal.Generated && portal.direction == direction)
-                        {
-                            //Vai do pai para o filho
-                            portal.SetRooms(parent.Data.roomInstance, GenRoom);
-                            portal.Generated = true;
-                            c++;
-                        }
-                    }
-
-                    //Passar parametros aos portais do filho para fazerem bem a ligação
-                    List<Teleporter> childPortals = GenRoom.GetComponent<RoomDirections>().Portals;
-                    foreach (Teleporter portal in childPortals)
-                    {
-                        //Se o filho tiver 2 portais tenho de saber para onde vai (partilham direcao)
-                        if (!portal.Generated && portal.direction == direction)
-                        {
-                            //Vai do filho para o pai
-                            portal.SetRooms(GenRoom, parent.Data.roomInstance);
-                            portal.Generated = true;
-                            c++;
-                        }
-                    }
-                    if (c % 2 == 0)
-                    {
-                        TreeNode<Room> child = parent.AddChild(new Room(GenRoom, type, direction, ice));
-                        treeNodes.Add(child);
-                        //Não faço no GetPosition porque só aqui é que dou spawn da sala
-                        roomPositions.Add(position);
-                    }
-                    else
-                    {
-                        Destroy(GenRoom);
-                        Debug.Log("(C impar)");
-                        //Debug.Log("Error: Could not instantiate room at " + new Vector3(position.y * gridSize, 0, position.x * gridSize));
+                        //Vai do pai para o filho
+                        portal.SetRooms(parent.Data.roomInstance, GenRoom);
                     }
                 }
+
+                //Passar parametros aos portais do filho para fazerem bem a ligação
+                List<Teleporter> childPortals = GenRoom.GetComponent<RoomDirections>().Portals;
+                foreach (Teleporter portal in childPortals)
+                {
+                    //Se o filho tiver 2 portais tenho de saber para onde vai (partilham direcao)
+                    if (portal.direction == direction)
+                    {
+                        //Vai do filho para o pai
+                        portal.SetRooms(GenRoom, parent.Data.roomInstance);
+                    }
+                }
+                TreeNode<Room> child = parent.AddChild(new Room(GenRoom, type, direction, ice));
+                treeNodes.Add(child);
+                //Não faço no GetPosition porque só aqui é que dou spawn da sala
+                roomPositions.Add(position);
             }
             else
             {
-                Debug.Log("(Spawn nao deu)");
-                //Debug.Log("Error: Could not instantiate room at " + new Vector3(position.y * gridSize, 0, position.x * gridSize));
+                Debug.Log("Erro: Não foi possivel instanciar um filho");
             }
-
         }
     }
 
