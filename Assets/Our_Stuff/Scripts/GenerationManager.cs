@@ -129,7 +129,7 @@ public class GenerationManager : MonoBehaviour
         }
 
         //Mudar os objetos ativos na cena, para optimização
-        GarbageCleanup(newRoom);
+        //GarbageCleanup(newRoom);
     }
 
     /// <summary>
@@ -175,7 +175,7 @@ public class GenerationManager : MonoBehaviour
                 //Logo dá spawn de um corredor final
                 if (depthLimit > -1 && parent.Level == depthLimit - 1)
                 {
-                    obj = GetRandomFinalCorridor(direction, parent);
+                    obj = GetRandomFinalCorridor(direction);
                     type = RoomType.FinalCorridor;
                 }
                 //Senão escolhe um corredor ao calhas
@@ -340,7 +340,7 @@ public class GenerationManager : MonoBehaviour
     {
         //supostamente faz (0,0), (1,0), (2,0) e quando chega aos 10, sobe de linha
         Vector2 lastVector = roomPositions[roomPositions.Count - 1];
-        if (lastVector.x < maxSpawnWidth)
+        if (lastVector.x < maxSpawnWidth - 1)
         {
             return lastVector + Vector2.right;
         }
