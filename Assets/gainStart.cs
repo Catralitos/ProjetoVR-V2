@@ -8,6 +8,7 @@ public class gainStart : MonoBehaviour
     public VRTK.VRTK_StepMultiplier step;
     private void Start()
     {
+        step =GameObject.FindGameObjectsWithTag("Player")[0].GetComponent<StepReference>().step;
         step.additionalMovementMultiplier = 0f;
         step.enabled = false;
     }
@@ -16,6 +17,7 @@ public class gainStart : MonoBehaviour
     {
         if(other.tag == "Player")
         {
+            step = other.GetComponent<StepReference>().step;
             step.enabled = true;
             step.additionalMovementMultiplier = 0.5f;
         }
@@ -25,6 +27,7 @@ public class gainStart : MonoBehaviour
     {
         if (other.tag == "Player")
         {
+            step = other.GetComponent<StepReference>().step;
             step.enabled = true;
             step.additionalMovementMultiplier = 0.5f;
         }

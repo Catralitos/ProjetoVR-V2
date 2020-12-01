@@ -313,6 +313,12 @@ PrefabInstance:
       propertyPath: maxSpawnWidth
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 7286117428653939524, guid: 46a78bd0229b5974daa7afb0604435e8,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 870366689997807849, guid: b43cd3f68ad9e23408d1545dc5126cb4,
+        type: 3}
     - target: {fileID: 7286117428653939525, guid: 46a78bd0229b5974daa7afb0604435e8,
         type: 3}
       propertyPath: m_Name

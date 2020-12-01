@@ -103,7 +103,7 @@ public class GenerationManager : MonoBehaviour
         Debug.Log("Meteu a raiz na lista");
 
         //Instanciar o player (vai ter que ser depois de instanciar a sala, não podemos pô-lo na cena no editor)
-        _ = Instantiate(player, new Vector3(0, 0.5f, 0), Quaternion.identity);
+        _ = Instantiate(player, new Vector3(0, 0f, 0), Quaternion.identity);
         Debug.Log("Instanciou o player");
 
         //Guardar a posição ocupada pela sala
