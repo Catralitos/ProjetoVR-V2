@@ -32,7 +32,7 @@ public class Teleporter : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             Vector3 change = DestinationRoom.transform.position - InitialRoom.transform.position;
-            Debug.Log(change);
+            //Debug.Log(change);
             other.GetComponent<TPreference>().player.transform.position += change;
             GenerationManager.instance.OnPortalPass(DestinationRoom);
         }
