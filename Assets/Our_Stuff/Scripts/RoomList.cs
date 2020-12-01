@@ -9,5 +9,4 @@ public class RoomList
     public RoomType roomType;
     public RoomDir roomDirection;
     public List<GameObject> rooms;
-
 }
