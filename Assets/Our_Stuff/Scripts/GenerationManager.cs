@@ -44,6 +44,9 @@ public class GenerationManager : MonoBehaviour
     //Se começo com gelo
     public bool iceRoot = false;
 
+    //Numero a imprimir na sala;
+    private int roomNumber = 1;
+
     private void Awake()
     {
         instance = this;
@@ -94,17 +97,18 @@ public class GenerationManager : MonoBehaviour
 
         //Instanciar essa sala
         GameObject aux = Instantiate(firstRoom, Vector3.zero, Quaternion.identity, this.gameObject.transform);
-        Debug.Log("Instanciou a sala " + aux);
+
         //Criar raiz da árvore (depois de instanciar, porque instancia != prefab e porque só se cria o node se instanciar bem)
-        //Nao sei se isto do root é preciso, mas só quero ter a certeza que o if do SpawnChildren da direção diferente não rebenta
         treeRoot = new TreeNode<Room>(new Room(aux, RoomType.Room, RoomDir.Root, iceRoot));
-        Debug.Log("Criou a raiz");
         treeNodes.Add(treeRoot);
-        Debug.Log("Meteu a raiz na lista");
+
+        foreach (TextMesh t in aux.GetComponentsInChildren<TextMesh>())
+        {
+            t.text = roomNumber.ToString();
+        }
 
         //Instanciar o player (vai ter que ser depois de instanciar a sala, não podemos pô-lo na cena no editor)
         _ = Instantiate(player, new Vector3(0, 0f, 0), Quaternion.identity);
-        Debug.Log("Instanciou o player");
 
         //Guardar a posição ocupada pela sala
         roomPositions.Add(Vector2.zero);
@@ -215,6 +219,7 @@ public class GenerationManager : MonoBehaviour
                 {
                     obj = GetRandomRoom(direction);
                     type = RoomType.Room;
+                    roomNumber++;
                 }
             }
             //Final corridor
@@ -223,6 +228,7 @@ public class GenerationManager : MonoBehaviour
                 //Buscar uma sala final
                 obj = GetFinalRoom(direction);
                 type = RoomType.Room;
+                roomNumber++;
             }
             Vector2 position = GetNewPosition();
             GameObject GenRoom = Instantiate(obj, new Vector3(position.y * gridSize, 0, position.x * gridSize), Quaternion.identity, this.gameObject.transform);
@@ -255,6 +261,13 @@ public class GenerationManager : MonoBehaviour
                 treeNodes.Add(child);
                 //Não faço no GetPosition porque só aqui é que dou spawn da sala
                 roomPositions.Add(position);
+                if (type == RoomType.Room)
+                {
+                    foreach (TextMesh t in GenRoom.GetComponentsInChildren<TextMesh>())
+                    {
+                        t.text = roomNumber.ToString();
+                    }
+                }
             }
             else
             {
