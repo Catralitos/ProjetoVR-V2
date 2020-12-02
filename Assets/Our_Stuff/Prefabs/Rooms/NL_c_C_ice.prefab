@@ -2793,7 +2793,6 @@ MonoBehaviour:
   InitialRoom: {fileID: 5571026355423213790}
   DestinationRoom: {fileID: 0}
   direction: 17
-  Generated: 0
 --- !u!1 &5571026356576187179
 GameObject:
   m_ObjectHideFlags: 0
@@ -3634,7 +3633,6 @@ MonoBehaviour:
   InitialRoom: {fileID: 0}
   DestinationRoom: {fileID: 0}
   direction: 1
-  Generated: 0
 --- !u!1 &6545161514401539139
 GameObject:
   m_ObjectHideFlags: 0
@@ -5825,7 +5823,7 @@ PrefabInstance:
     - target: {fileID: 1564661492453602013, guid: 1edd2027bf67dc14d8b0e4ad54041ef8,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4639361792117561393, guid: 1edd2027bf67dc14d8b0e4ad54041ef8,
         type: 3}
