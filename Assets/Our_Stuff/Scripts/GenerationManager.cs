@@ -48,15 +48,15 @@ public class GenerationManager : MonoBehaviour
     public GameObject interactivePrefab;
     //Objetivo onde entregar
     public GameObject goalPrefab;
-
     //Vamos dividir a lista de nodes em x partes diferentes. 
     //Vamos escolher a primeira e a ultima parte
-    //Escolhemos da primeira parte onde metemos o objective
+    //Escolhemos da primeira parte onde metemos o interactable
     //E na ultima parte onde metemos o goal
     //Como isto faz recursivo/depth first
     //Se for 2, por exemplo, em principio ficam em lados opostos da árvore
     [Range(1, 10)]
     public int distanceFactor = 2;
+
     //Numero a imprimir na sala;
     private int roomNumber = 1;
 
