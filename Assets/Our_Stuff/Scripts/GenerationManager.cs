@@ -36,7 +36,7 @@ public class GenerationManager : MonoBehaviour
     private List<TreeNode<Room>> treeNodes = new List<TreeNode<Room>>();
 
     //-1 se nao houver limite, depois podemos meter outro valor, as este é o default
-    public int depthLimit = -1;
+    public int depthLimit = 3;
     //Tamanho da maior sala, para quando metermos as salas como se numa grid cabem todas
     public int gridSize = 10;
     //Quando começa a criar as salas numa linha diferente
@@ -44,6 +44,19 @@ public class GenerationManager : MonoBehaviour
     //Se começo com gelo
     public bool iceRoot = false;
 
+    //Objeto a pegar e levar ao objetivo
+    public GameObject interactivePrefab;
+    //Objetivo onde entregar
+    public GameObject goalPrefab;
+
+    //Vamos dividir a lista de nodes em x partes diferentes. 
+    //Vamos escolher a primeira e a ultima parte
+    //Escolhemos da primeira parte onde metemos o objective
+    //E na ultima parte onde metemos o goal
+    //Como isto faz recursivo/depth first
+    //Se for 2, por exemplo, em principio ficam em lados opostos da árvore
+    [Range(1, 10)]
+    public int distanceFactor = 2;
     //Numero a imprimir na sala;
     private int roomNumber = 1;
 
@@ -92,32 +105,130 @@ public class GenerationManager : MonoBehaviour
 
     void Start()
     {
-        //Escolher primeira sala aleatoriamente
-        GameObject firstRoom = GetRandomRoot(iceRoot);
-
-        //Instanciar essa sala
-        GameObject aux = Instantiate(firstRoom, Vector3.zero, Quaternion.identity, this.gameObject.transform);
-
-        //Criar raiz da árvore (depois de instanciar, porque instancia != prefab e porque só se cria o node se instanciar bem)
-        treeRoot = new TreeNode<Room>(new Room(aux, RoomType.Room, RoomDir.Root, iceRoot));
-        treeNodes.Add(treeRoot);
-
-        foreach (TextMesh t in aux.GetComponentsInChildren<TextMesh>())
+        if (depthLimit > 1)
         {
-            t.text = roomNumber.ToString();
-        }
+            //Escolher primeira sala aleatoriamente
+            GameObject firstRoom = GetRandomRoot(iceRoot);
 
-        //Instanciar o player (vai ter que ser depois de instanciar a sala, não podemos pô-lo na cena no editor)
-        _ = Instantiate(player, new Vector3(0, 0f, 0), Quaternion.identity);
+            //Instanciar essa sala
+            GameObject aux = Instantiate(firstRoom, Vector3.zero, Quaternion.identity, this.gameObject.transform);
 
-        //Guardar a posição ocupada pela sala
-        roomPositions.Add(Vector2.zero);
+            //Criar raiz da árvore (depois de instanciar, porque instancia != prefab e porque só se cria o node se instanciar bem)
+            treeRoot = new TreeNode<Room>(new Room(aux, RoomType.Room, RoomDir.Root, iceRoot));
+            treeNodes.Add(treeRoot);
 
-        //Criar filho para cada saida possivel
-        if (depthLimit > 1 || depthLimit < 0)
-        {
+            foreach (TextMesh t in aux.GetComponentsInChildren<TextMesh>())
+            {
+                t.text = roomNumber.ToString();
+            }
+
+            //Instanciar o player (vai ter que ser depois de instanciar a sala, não podemos pô-lo na cena no editor)
+            _ = Instantiate(player, new Vector3(0, 0f, 0), Quaternion.identity);
+
+            //Guardar a posição ocupada pela sala
+            roomPositions.Add(Vector2.zero);
+
+            //Dar spawn dos filhos
             SpawnChildren(treeRoot);
+
+            //Dar spawn dos interactables
+            SpawnInteractables();
+
+            //Desativar o mapa nao necessário
+            GarbageCleanup(treeRoot);
         }
+        else
+        {
+            Debug.Log("ERROR: Depth must be higher than 1");
+        }
+    }
+
+    void SpawnInteractables()
+    {
+        TreeNode<Room> interactiveRoom = null;
+        TreeNode<Room> goalRoom = null;
+        if (distanceFactor > 1)
+        {
+            List<List<TreeNode<Room>>> lists = SplitRoomsList();
+            List<TreeNode<Room>> firstBlock = lists[0];
+            List<TreeNode<Room>> lastBlock = lists[lists.Count - 1];
+
+            int c = 0;
+            while (interactiveRoom == null && c < 1000)
+            {
+                TreeNode<Room> aux = firstBlock[Random.Range(0, firstBlock.Count)];
+                if (aux.Data.RoomType == RoomType.Room || aux.Data.RoomType == RoomType.Final)
+                {
+                    interactiveRoom = aux;
+                }
+            }
+            if (c == 1000)
+            {
+                Debug.Log("ERROR: Could not find room to spawn interactive prefab");
+            }
+
+            c = 0;
+            while (goalRoom == null && c < 1000)
+            {
+                TreeNode<Room> aux = lastBlock[Random.Range(0, lastBlock.Count)];
+                if (aux.Data.RoomType == RoomType.Room || aux.Data.RoomType == RoomType.Final)
+                {
+                    goalRoom = aux;
+                }
+            }
+            if (c == 1000)
+            {
+                Debug.Log("ERROR: Could not find room to spawn goal prefab");
+            }
+        } else
+        {
+            int c = 0;
+            while (interactiveRoom == null && c < 1000)
+            {
+                TreeNode<Room> aux = treeNodes[Random.Range(0, treeNodes.Count)];
+                if (aux.Data.RoomType == RoomType.Room || aux.Data.RoomType == RoomType.Final)
+                {
+                    interactiveRoom = aux;
+                }
+            }
+            if (c == 1000)
+            {
+                Debug.Log("ERROR: Could not find room to spawn interactive prefab");
+            }
+
+            c = 0;
+            while (goalRoom == null && c < 1000)
+            {
+                TreeNode<Room> aux = treeNodes[Random.Range(0, treeNodes.Count)];
+                if (aux.Data.RoomType == RoomType.Room || aux.Data.RoomType == RoomType.Final)
+                {
+                    goalRoom = aux;
+                }
+            }
+            if (c == 1000)
+            {
+                Debug.Log("ERROR: Could not find room to spawn goal prefab");
+            }
+        }
+
+        //Dar os spawns em si
+        if(Instantiate(interactivePrefab, Vector3.zero, Quaternion.identity, interactiveRoom.Data.roomInstance.transform))
+        {
+            Debug.Log("Spawned interactable in " + treeNodes.IndexOf(interactiveRoom) + " - "  + interactiveRoom.Data.roomInstance);
+        } else
+        {
+            Debug.Log("ERROR: Could not spawn interactable");
+        }
+
+        if (Instantiate(goalPrefab, Vector3.zero, Quaternion.identity, goalRoom.Data.roomInstance.transform))
+        {
+            Debug.Log("Spawned goal in " + treeNodes.IndexOf(goalRoom) + " - " + goalRoom.Data.roomInstance);
+        }
+        else
+        {
+            Debug.Log("ERROR: Could not spawn goal");
+        }
+
     }
 
     /// <summary>
@@ -127,16 +238,8 @@ public class GenerationManager : MonoBehaviour
     /// <param name="newRoom">A nova sala para onde o player vai (passada pelo portal)</param>
     public void OnPortalPass(GameObject obj)
     {
-        TreeNode<Room> newRoom = GetTreeNode(obj);
-
-        //Não tem filhos, tem que instanciar filhos (excepçoes tratadas no metodo em si)
-        if (newRoom.IsLeaf)
-        {
-            SpawnChildren(newRoom);
-        }
-
         //Mudar os objetos ativos na cena, para optimização
-        GarbageCleanup(newRoom);
+        GarbageCleanup(GetTreeNode(obj));
     }
 
     /// <summary>
@@ -169,109 +272,117 @@ public class GenerationManager : MonoBehaviour
     /// <param name="parent">Node pai</param>
     private void SpawnChildren(TreeNode<Room> parent)
     {
-        List<RoomDir> directions = parent.Data.PortalPositions;
-        directions.Remove(parent.Data.EntranceDirection);
-        foreach (RoomDir direction in directions)
+        if (parent.IsLeaf)
         {
-            GameObject obj;
-            RoomType type;
-            bool ice = false;
-            //bool dontBother = false;
-            //Sala normal (não interessa ser de gelo o GetRandomCorridor vai à lista correcta)
-            if (parent.Data.RoomType == RoomType.Room)
+            List<RoomDir> directions = parent.Data.PortalPositions;
+            directions.Remove(parent.Data.EntranceDirection);
+            foreach (RoomDir direction in directions)
             {
-                //Se a sala for a penultima em depth nao pode dar spawn de uma sala final a seguir
-                //Logo dá spawn de um corredor final
-                if (depthLimit > -1 && parent.Level == depthLimit - 1)
+                GameObject obj;
+                RoomType type;
+                bool ice = false;
+                //bool dontBother = false;
+                //Sala normal (não interessa ser de gelo o GetRandomCorridor vai à lista correcta)
+                if (parent.Data.RoomType == RoomType.Room)
                 {
-                    obj = GetRandomFinalCorridor(direction);
-                    type = RoomType.FinalCorridor;
-                }
-                //Senão escolhe um corredor ao calhas
-                else
-                {
-                    //Só vai buscar corredor de gelo se o pai for sala de gelo
-                    if (parent.Data.IceRoom && parent.Data.RoomType == RoomType.Room)
+                    //Se a sala for a penultima em depth nao pode dar spawn de uma sala final a seguir
+                    //Logo dá spawn de um corredor final
+                    if (parent.Level == depthLimit - 1 || parent.Level == depthLimit - 2)
                     {
-                        obj = GetRandomIceCorridor(direction);
-                        type = RoomType.Corridor;
-                        ice = true;
+                        obj = GetRandomFinalCorridor(direction);
+                        type = RoomType.FinalCorridor;
                     }
+                    //Senão escolhe um corredor ao calhas
                     else
+                    {
+                        //Só vai buscar corredor de gelo se o pai for sala de gelo
+                        if (parent.Data.IceRoom && parent.Data.RoomType == RoomType.Room)
+                        {
+                            obj = GetRandomIceCorridor(direction);
+                            type = RoomType.Corridor;
+                            ice = true;
+                        }
+                        else
+                        {
+                            obj = GetRandomCorridor(direction);
+                            type = RoomType.Corridor;
+                        }
+                    }
+
+                }
+                //Se for corredor
+                else if (parent.Data.RoomType == RoomType.Corridor)
+                {
+                    //Se o corredor for de gelo, vai buscar um corredor normal
+                    if (parent.Data.IceRoom)
                     {
                         obj = GetRandomCorridor(direction);
                         type = RoomType.Corridor;
                     }
+                    //Se não for de gelo não liga
+                    else
+                    {
+                        obj = GetRandomRoom(direction);
+                        type = RoomType.Room;
+                        roomNumber++;
+                    }
                 }
-
-            }
-            //Se for corredor
-            else if (parent.Data.RoomType == RoomType.Corridor)
-            {
-                //Se o corredor for de gelo, vai buscar um corredor normal
-                if (parent.Data.IceRoom)
-                {
-                    obj = GetRandomCorridor(direction);
-                    type = RoomType.Corridor;
-                }
-                //Se não for de gelo não liga
+                //Final corridor
                 else
                 {
-                    obj = GetRandomRoom(direction);
+                    //Buscar uma sala final
+                    obj = GetFinalRoom(direction);
                     type = RoomType.Room;
                     roomNumber++;
                 }
-            }
-            //Final corridor
-            else
-            {
-                //Buscar uma sala final
-                obj = GetFinalRoom(direction);
-                type = RoomType.Room;
-                roomNumber++;
-            }
-            Vector2 position = GetNewPosition();
-            GameObject GenRoom = Instantiate(obj, new Vector3(position.y * gridSize, 0, position.x * gridSize), Quaternion.identity, this.gameObject.transform);
-            if (GenRoom != null)
-            {
-                //Passar parametros aos portais do pai para fazerem bem a ligação
-                List<Teleporter> parentPortals = parent.Data.roomInstance.GetComponent<RoomDirections>().Portals;
-                foreach (Teleporter portal in parentPortals)
+                Vector2 position = GetNewPosition();
+                GameObject GenRoom = Instantiate(obj, new Vector3(position.y * gridSize, 0, position.x * gridSize), Quaternion.identity, this.gameObject.transform);
+                if (GenRoom != null)
                 {
-                    //Se o pai/currente tiver 2 portais tenho de saber qual vai ligar
-                    if (portal.direction == direction)
+                    //Passar parametros aos portais do pai para fazerem bem a ligação
+                    List<Teleporter> parentPortals = parent.Data.roomInstance.GetComponent<RoomDirections>().Portals;
+                    foreach (Teleporter portal in parentPortals)
                     {
-                        //Vai do pai para o filho
-                        portal.SetRooms(parent.Data.roomInstance, GenRoom);
+                        //Se o pai/currente tiver 2 portais tenho de saber qual vai ligar
+                        if (portal.direction == direction)
+                        {
+                            //Vai do pai para o filho
+                            portal.SetRooms(parent.Data.roomInstance, GenRoom);
+                        }
                     }
-                }
 
-                //Passar parametros aos portais do filho para fazerem bem a ligação
-                List<Teleporter> childPortals = GenRoom.GetComponent<RoomDirections>().Portals;
-                foreach (Teleporter portal in childPortals)
-                {
-                    //Se o filho tiver 2 portais tenho de saber para onde vai (partilham direcao)
-                    if (portal.direction == direction)
+                    //Passar parametros aos portais do filho para fazerem bem a ligação
+                    List<Teleporter> childPortals = GenRoom.GetComponent<RoomDirections>().Portals;
+                    foreach (Teleporter portal in childPortals)
                     {
-                        //Vai do filho para o pai
-                        portal.SetRooms(GenRoom, parent.Data.roomInstance);
+                        //Se o filho tiver 2 portais tenho de saber para onde vai (partilham direcao)
+                        if (portal.direction == direction)
+                        {
+                            //Vai do filho para o pai
+                            portal.SetRooms(GenRoom, parent.Data.roomInstance);
+                        }
                     }
-                }
-                TreeNode<Room> child = parent.AddChild(new Room(GenRoom, type, direction, ice));
-                treeNodes.Add(child);
-                //Não faço no GetPosition porque só aqui é que dou spawn da sala
-                roomPositions.Add(position);
-                if (type == RoomType.Room)
-                {
-                    foreach (TextMesh t in GenRoom.GetComponentsInChildren<TextMesh>())
+                    TreeNode<Room> child = parent.AddChild(new Room(GenRoom, type, direction, ice));
+                    treeNodes.Add(child);
+                    //Não faço no GetPosition porque só aqui é que dou spawn da sala
+                    roomPositions.Add(position);
+
+                    if (type == RoomType.Room)
                     {
-                        t.text = roomNumber.ToString();
+                        foreach (TextMesh t in GenRoom.GetComponentsInChildren<TextMesh>())
+                        {
+                            t.text = roomNumber.ToString();
+                        }
                     }
+
+                    //Dar spawn dos filhos desta sala tambem
+                    SpawnChildren(child);
+
                 }
-            }
-            else
-            {
-                Debug.Log("Erro: Não foi possivel instanciar um filho");
+                else
+                {
+                    Debug.Log("Error: Could not instantiate child for " + treeNodes.IndexOf(parent) + " - " + parent.Data.roomInstance);
+                }
             }
         }
     }
@@ -376,7 +487,17 @@ public class GenerationManager : MonoBehaviour
         return null;
     }
 
+    private List<List<TreeNode<Room>>> SplitRoomsList()
+    {
+        var list = new List<List<TreeNode<Room>>>();
 
+        for (int i = 0; i < treeNodes.Count; i += distanceFactor)
+        {
+            list.Add(treeNodes.GetRange(i, Mathf.Min(distanceFactor, treeNodes.Count - i)));
+        }
+
+        return list;
+    }
 
 
 }
