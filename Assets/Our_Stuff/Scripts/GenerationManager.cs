@@ -123,7 +123,7 @@ public class GenerationManager : MonoBehaviour
             }
 
             //Instanciar o player (vai ter que ser depois de instanciar a sala, não podemos pô-lo na cena no editor)
-            _ = Instantiate(player, new Vector3(0, 0f, 0), Quaternion.identity);
+            _ = Instantiate(player, new Vector3(0, 0.5f, 0), Quaternion.identity);
 
             //Guardar a posição ocupada pela sala
             roomPositions.Add(Vector2.zero);
