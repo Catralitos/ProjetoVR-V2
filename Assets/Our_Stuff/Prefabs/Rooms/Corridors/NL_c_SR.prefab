@@ -4203,7 +4203,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PortalPositions: 
   Portals: []
-  IceRoom: 0
 --- !u!1 &7028774328648435393
 GameObject:
   m_ObjectHideFlags: 0
