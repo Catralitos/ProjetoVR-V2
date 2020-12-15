@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,6 +26,15 @@ public class RoomFactory : MonoBehaviour
 
         //TO-DO
         //compare method
+        public static bool operator ==(RoomDirection dir1, RoomDirection dir2)
+        {
+            return (dir1.dir == dir2.dir && dir1.ori == dir2.ori);
+        }
+
+        public static bool operator !=(RoomDirection dir1, RoomDirection dir2)
+        {
+            return !(dir1.dir == dir2.dir && dir1.ori == dir2.ori);
+        }
     }
     private Dictionary<RoomDir, RoomDirection> DirToDirMap = new Dictionary<RoomDir, RoomDirection>() 
     {
@@ -56,41 +66,63 @@ public class RoomFactory : MonoBehaviour
     public GameObject InnerWall;
     public GameObject Door;
 
-    private int CreateEntrance(RoomDirection entrance, GameObject room, int numberOfExits)
+
+    private void SetTeleporterDir(RoomDirection direction, GameObject teleporter)
+    {
+        foreach (KeyValuePair<RoomDir, RoomDirection> rd in DirToDirMap)
+        {
+            if (rd.Value == direction)
+            {
+                teleporter.GetComponentInChildren<Teleporter>().direction = rd.Key;
+                break;
+            }
+        }
+    }
+    private int CreateEntrance(RoomDirection entrance, GameObject room, int numberOfExits, List<Directions> directionsUsed)
     {
         int newNumberOfExits = numberOfExits;
+        GameObject portal_L;
+        GameObject portal_R;
         GameObject entranceObj = new GameObject(entrance.dir.ToString()+entrance.ori.ToString());
         Instantiate(Door, entranceObj.transform);
+        directionsUsed.Add(entrance.dir);
         switch (entrance.ori)
         {
             case Orientation.Left:
-                Instantiate(PortalLeft, entranceObj.transform);
+                portal_L = Instantiate(PortalLeft, entranceObj.transform);
                 Instantiate(MiniWall_R,entranceObj.transform);
+                
                 break;            
             case Orientation.Right:
-                Instantiate(PortalRight, entranceObj.transform);
+                 portal_R = Instantiate(PortalRight, entranceObj.transform);
                 Instantiate(MiniWall_L, entranceObj.transform);
                 break;
             case Orientation.LeftRight:
-                Instantiate(PortalLeft, entranceObj.transform);
-                Instantiate(PortalRight, entranceObj.transform);
+                portal_L = Instantiate(PortalLeft, entranceObj.transform);
+                portal_R = Instantiate(PortalRight, entranceObj.transform);
+                RoomDirection RDir = new RoomDirection { dir = entrance.dir, ori = Orientation.RightLeft };
+                SetTeleporterDir(entrance, portal_L);
+                SetTeleporterDir(RDir, portal_R);
                 newNumberOfExits--;
                 break;
             case Orientation.RightLeft:
-                Instantiate(PortalLeft, entranceObj.transform);
-                Instantiate(PortalRight, entranceObj.transform);
+                portal_L = Instantiate(PortalLeft, entranceObj.transform);
+                portal_R = Instantiate(PortalRight, entranceObj.transform);
+                RoomDirection LDir = new RoomDirection { dir = entrance.dir, ori = Orientation.LeftRight };
+                SetTeleporterDir(entrance, portal_R);
+                SetTeleporterDir(LDir, portal_L);
                 newNumberOfExits--;
                 break;
         }
-        RotateToDir(entranceObj, entrance);
+        RotateToDir(entranceObj, entrance.dir);
         entranceObj.transform.SetParent(room.transform);
         return newNumberOfExits;
     }
 
-    private void RotateToDir(GameObject obj,RoomDirection dir)
+    private void RotateToDir(GameObject obj,Directions dir)
     {
         Vector3 rotVal;
-        switch (dir.dir)
+        switch (dir)
         {
             case Directions.North:
                 rotVal = new Vector3(0, 0, 0);
@@ -111,14 +143,48 @@ public class RoomFactory : MonoBehaviour
         obj.transform.Rotate(rotVal);
     }
 
-    public GameObject CreateRoom(RoomDir entranceDir,int numberOfExits)//numberOfExits 0-7
+    public GameObject CreateRoom(RoomDir entranceDir,int maxNumberOfExits)//numberOfExits 0-7
     {
+        if (maxNumberOfExits > 7) maxNumberOfExits = 7;
+        List<Directions> directionsUsed = new List<Directions>();
         GameObject room = new GameObject("room");
         Instantiate(BaseStructure, room.transform);
         RoomDirection entranceDirection = DirToDirMap[entranceDir];
-        CreateEntrance(entranceDirection, room, numberOfExits);
+        maxNumberOfExits = CreateEntrance(entranceDirection, room, maxNumberOfExits, directionsUsed);
+        while (maxNumberOfExits > 0)
+        {
+            maxNumberOfExits = CreateExit(room,maxNumberOfExits,directionsUsed);
+        }
+        foreach(Directions d in System.Enum.GetValues(typeof(Directions)))
+        {
+            if (!(directionsUsed.Contains(d)))
+            {
+                CreateWall(room,d);
+            }
+        }
         //TO_DO Create Exits
+
         return room;
+    }
+
+    private void CreateWall(GameObject room, Directions d)
+    {
+        GameObject wallObj = new GameObject("wall"+d.ToString());
+        Instantiate(InnerWall, wallObj.transform);
+        RotateToDir(wallObj, d);
+    }
+
+    private int CreateExit(GameObject room, int maxNumberOfExits, List<Directions> directionsUsed)
+    {
+        int newMaxNuberOfExits = maxNumberOfExits;
+        Array values = Enum.GetValues(typeof(Directions));
+        System.Random random = new System.Random();
+        Directions randomDirr = (Directions)values.GetValue(random.Next(values.Length));
+        if (!(directionsUsed.Contains(randomDirr)))
+        {
+
+        }
+        return newMaxNuberOfExits;
     }
 
     private void Start()
