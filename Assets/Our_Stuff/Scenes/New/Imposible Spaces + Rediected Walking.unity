@@ -890,7 +890,7 @@ MonoBehaviour:
     ringOverride: 1
     applyPinkyOverride: 1
     pinkyOverride: 1
-  handModel: {fileID: 0}
+  handModel: {fileID: 6158456513270690566}
   controllerEvents: {fileID: 2299805836949050103}
   interactNearTouch: {fileID: 2299805836949050098}
   interactTouch: {fileID: 2299805836949050097}
