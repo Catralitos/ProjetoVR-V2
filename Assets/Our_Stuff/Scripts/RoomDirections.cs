@@ -31,4 +31,14 @@ public class RoomDirections : MonoBehaviour
         }
     }
 
+    public void getValues()
+    {
+        foreach (Teleporter tp in GetComponentsInChildren<Teleporter>())
+        {
+            Portals.Add(tp);
+            PortalPositions.Add(tp.direction);
+        }
+    }
+
+
 }

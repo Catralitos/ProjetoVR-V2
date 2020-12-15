@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,6 +20,11 @@ public class RoomFactory : MonoBehaviour
         LeftRight = 2,
         RightLeft = 3,
     }
+
+    List<Directions> allDirections = Enum.GetValues(typeof(Directions))
+                          .Cast<Directions>()
+                          .ToList();
+
     class RoomDirection
     {
         public Directions dir { get; set; }
@@ -152,6 +159,7 @@ public class RoomFactory : MonoBehaviour
         if (maxNumberOfExits > 7) maxNumberOfExits = 7;
         List<Directions> directionsUsed = new List<Directions>();
         GameObject room = new GameObject(entranceDir.ToString()+maxNumberOfExits);
+        room.AddComponent<RoomDirections>();
         Instantiate(BaseStructure, room.transform);
         RoomDirection entranceDirection = DirToDirMap[entranceDir];
         maxNumberOfExits = CreateEntrance(entranceDirection, room, maxNumberOfExits, directionsUsed);
@@ -176,6 +184,7 @@ public class RoomFactory : MonoBehaviour
         foreach(Directions debugDir in directionsUsed){
             Debug.Log(debugDir.ToString());
         }
+        room.GetComponent<RoomDirections>().getValues();
         return room;
     }
 
@@ -190,15 +199,20 @@ public class RoomFactory : MonoBehaviour
     private int CreateExit(GameObject room, int maxNumberOfExits, List<Directions> directionsUsed)
     {
         int newNumberOfExits = maxNumberOfExits;
+        List<Directions> remainingDirection = allDirections.Except<Directions>(directionsUsed).ToList();
         GameObject doorObj;
-        System.Array dirValues = System.Enum.GetValues(typeof(Directions));
-        Directions randomDir = (Directions)dirValues.GetValue(Random.Range(0, dirValues.Length-1));
 
-        if (!(directionsUsed.Contains(randomDir)))
+        if (remainingDirection.Count == 0) 
         {
+            newNumberOfExits = 0;
+        }
+        else
+        {
+            Directions randomDir = remainingDirection.ElementAt(UnityEngine.Random.Range(0, remainingDirection.Count));
+            //(Directions)dirValues.GetValue(UnityEngine.Random.Range(0, dirValues.Length-1));
             newNumberOfExits--;
             System.Array values = System.Enum.GetValues(typeof(Orientation));
-            Orientation randomOri = (Orientation)values.GetValue(Random.Range(0, values.Length-1));
+            Orientation randomOri = (Orientation)values.GetValue(UnityEngine.Random.Range(0, values.Length - 1));
             RoomDirection doorDir = new RoomDirection { dir = randomDir, ori = randomOri };
             if (maxNumberOfExits < 2)
             {
@@ -222,14 +236,14 @@ public class RoomFactory : MonoBehaviour
             }
             else
             {
-                doorObj = new GameObject("entrance: "+randomDir + randomOri.ToString());
+                doorObj = new GameObject("entrance: " + randomDir + randomOri.ToString());
                 newNumberOfExits = CreateDoor(doorObj, doorDir, newNumberOfExits);
             }
             directionsUsed.Add(randomDir);
             doorObj.transform.SetParent(room.transform);
+            Instantiate(Door, doorObj.transform);
             RotateToDir(doorObj, randomDir);
         }
-
         return newNumberOfExits;
     }
 
@@ -238,22 +252,21 @@ public class RoomFactory : MonoBehaviour
         Debug.Log("starting");
      
         System.Array dirValues = System.Enum.GetValues(typeof(RoomDir));
-        RoomDir randomDir = (RoomDir)dirValues.GetValue(Random.Range(1,dirValues.Length - 2));
+        RoomDir randomDir = (RoomDir)dirValues.GetValue(UnityEngine.Random.Range(1,dirValues.Length - 2));
         GameObject room = CreateRoom(randomDir, 0);
-        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        randomDir = (RoomDir)dirValues.GetValue(UnityEngine.Random.Range(1, dirValues.Length - 2));
         room = CreateRoom(randomDir, 1);
-        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        randomDir = (RoomDir)dirValues.GetValue(UnityEngine.Random.Range(1, dirValues.Length - 2));
         room = CreateRoom(randomDir, 2);
-        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        randomDir = (RoomDir)dirValues.GetValue(UnityEngine.Random.Range(1, dirValues.Length - 2));
         room = CreateRoom(randomDir, 3);
-        /*randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        randomDir = (RoomDir)dirValues.GetValue(UnityEngine.Random.Range(1, dirValues.Length - 2));
         room = CreateRoom(randomDir, 4);
-        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        randomDir = (RoomDir)dirValues.GetValue(UnityEngine.Random.Range(1, dirValues.Length - 2));
         room = CreateRoom(randomDir, 5);
-        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        randomDir = (RoomDir)dirValues.GetValue(UnityEngine.Random.Range(1, dirValues.Length - 2));
         room = CreateRoom(randomDir, 6);
-        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        randomDir = (RoomDir)dirValues.GetValue(UnityEngine.Random.Range(1, dirValues.Length - 2));
         room = CreateRoom(randomDir, 7);
-    */
     }
 }
