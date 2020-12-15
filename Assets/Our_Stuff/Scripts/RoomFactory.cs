@@ -42,6 +42,7 @@ public class RoomFactory : MonoBehaviour
             return !(dir1.dir == dir2.dir && dir1.ori == dir2.ori);
         }
     }
+
     private Dictionary<RoomDir, RoomDirection> DirToDirMap = new Dictionary<RoomDir, RoomDirection>()
     {
         { RoomDir.East_L, new RoomDirection {dir = Directions.East, ori = Orientation.Left } },
@@ -105,11 +106,12 @@ public class RoomFactory : MonoBehaviour
             case Orientation.Left:
                 portal_L = Instantiate(PortalLeft, doorObj.transform);
                 Instantiate(MiniWall_R, doorObj.transform);
-
+                SetTeleporterDir(entrance, portal_L);
                 break;
             case Orientation.Right:
                 portal_R = Instantiate(PortalRight, doorObj.transform);
                 Instantiate(MiniWall_L, doorObj.transform);
+                SetTeleporterDir(entrance, portal_R);
                 break;
             case Orientation.LeftRight:
                 portal_L = Instantiate(PortalLeft, doorObj.transform);
@@ -159,7 +161,6 @@ public class RoomFactory : MonoBehaviour
         if (maxNumberOfExits > 7) maxNumberOfExits = 7;
         List<Directions> directionsUsed = new List<Directions>();
         GameObject room = new GameObject(entranceDir.ToString()+maxNumberOfExits);
-        room.AddComponent<RoomDirections>();
         Instantiate(BaseStructure, room.transform);
         RoomDirection entranceDirection = DirToDirMap[entranceDir];
         maxNumberOfExits = CreateEntrance(entranceDirection, room, maxNumberOfExits, directionsUsed);
@@ -184,7 +185,7 @@ public class RoomFactory : MonoBehaviour
         foreach(Directions debugDir in directionsUsed){
             Debug.Log(debugDir.ToString());
         }
-        room.GetComponent<RoomDirections>().getValues();
+        room.AddComponent<RoomDirections>();
         return room;
     }
 
@@ -247,7 +248,7 @@ public class RoomFactory : MonoBehaviour
         return newNumberOfExits;
     }
 
-    /*private void Start()
+    private void Start()
     {
         Debug.Log("starting");
      
@@ -268,5 +269,5 @@ public class RoomFactory : MonoBehaviour
         room = CreateRoom(randomDir, 6);
         randomDir = (RoomDir)dirValues.GetValue(UnityEngine.Random.Range(1, dirValues.Length - 2));
         room = CreateRoom(randomDir, 7);
-    }*/
+    }
 }

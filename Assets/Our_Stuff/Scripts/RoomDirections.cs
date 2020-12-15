@@ -24,7 +24,9 @@ public class RoomDirections : MonoBehaviour
 
     private void Awake()
     {
-        foreach(Teleporter tp in GetComponentsInChildren<Teleporter>())
+        PortalPositions = new List<RoomDir>();
+        Portals = new List<Teleporter>();
+        foreach (Teleporter tp in GetComponentsInChildren<Teleporter>())
         {
             Portals.Add(tp);
             PortalPositions.Add(tp.direction);
@@ -33,6 +35,8 @@ public class RoomDirections : MonoBehaviour
 
     public void getValues()
     {
+        PortalPositions.Clear();
+        Portals.Clear();
         foreach (Teleporter tp in GetComponentsInChildren<Teleporter>())
         {
             Portals.Add(tp);
