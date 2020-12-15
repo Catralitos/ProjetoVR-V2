@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -82,7 +81,7 @@ public class RoomFactory : MonoBehaviour
     {
         int newNumberOfExits = numberOfExits;
        
-        GameObject entranceObj = new GameObject(entrance.dir.ToString() + entrance.ori.ToString());
+        GameObject entranceObj = new GameObject("entrance: "+entrance.dir.ToString() + entrance.ori.ToString());
         Instantiate(Door, entranceObj.transform);
         directionsUsed.Add(entrance.dir);
         newNumberOfExits = CreateDoor(entranceObj,entrance,newNumberOfExits);
@@ -152,13 +151,17 @@ public class RoomFactory : MonoBehaviour
     {
         if (maxNumberOfExits > 7) maxNumberOfExits = 7;
         List<Directions> directionsUsed = new List<Directions>();
-        GameObject room = new GameObject("room");
+        GameObject room = new GameObject(entranceDir.ToString()+maxNumberOfExits);
         Instantiate(BaseStructure, room.transform);
         RoomDirection entranceDirection = DirToDirMap[entranceDir];
         maxNumberOfExits = CreateEntrance(entranceDirection, room, maxNumberOfExits, directionsUsed);
         while (maxNumberOfExits > 0)
-        {
+        {   
             maxNumberOfExits = CreateExit(room,maxNumberOfExits,directionsUsed);
+            if (directionsUsed.Count >= 4)
+            {
+                maxNumberOfExits = 0;
+            }
         }
         foreach(Directions d in System.Enum.GetValues(typeof(Directions)))
         {
@@ -168,7 +171,11 @@ public class RoomFactory : MonoBehaviour
             }
         }
         //TO_DO Create Exits
-
+        Debug.Log("created room: "+ entranceDir.ToString() + maxNumberOfExits);
+        Debug.Log("With exits in: ");
+        foreach(Directions debugDir in directionsUsed){
+            Debug.Log(debugDir.ToString());
+        }
         return room;
     }
 
@@ -182,21 +189,71 @@ public class RoomFactory : MonoBehaviour
 
     private int CreateExit(GameObject room, int maxNumberOfExits, List<Directions> directionsUsed)
     {
-        int newMaxNuberOfExits = maxNumberOfExits;
-        Array dirValues = Enum.GetValues(typeof(Directions));
-        System.Random random = new System.Random();
-        Directions randomDir = (Directions)dirValues.GetValue(random.Next(dirValues.Length));
+        int newNumberOfExits = maxNumberOfExits;
+        GameObject doorObj;
+        System.Array dirValues = System.Enum.GetValues(typeof(Directions));
+        Directions randomDir = (Directions)dirValues.GetValue(Random.Range(0, dirValues.Length-1));
+
         if (!(directionsUsed.Contains(randomDir)))
         {
-            Array values = Enum.GetValues(typeof(Orientation));
-            Orientation randomÕri = (Orientation)values.GetValue(random.Next(values.Length));
-            
+            newNumberOfExits--;
+            System.Array values = System.Enum.GetValues(typeof(Orientation));
+            Orientation randomOri = (Orientation)values.GetValue(Random.Range(0, values.Length-1));
+            RoomDirection doorDir = new RoomDirection { dir = randomDir, ori = randomOri };
+            if (maxNumberOfExits < 2)
+            {
+                switch (randomOri)
+                {
+                    case Orientation.LeftRight:
+                        doorDir = new RoomDirection { dir = randomDir, ori = Orientation.Left };
+                        doorObj = new GameObject("entrance: " + randomDir + Orientation.Left.ToString());
+                        newNumberOfExits = CreateDoor(doorObj, doorDir, newNumberOfExits);
+                        break;
+                    case Orientation.RightLeft:
+                        doorDir = new RoomDirection { dir = randomDir, ori = Orientation.Right };
+                        doorObj = new GameObject("entrance: " + randomDir + randomOri.ToString());
+                        newNumberOfExits = CreateDoor(doorObj, doorDir, newNumberOfExits);
+                        break;
+                    default:
+                        doorObj = new GameObject("entrance: " + randomDir + Orientation.Right.ToString());
+                        newNumberOfExits = CreateDoor(doorObj, doorDir, newNumberOfExits);
+                        break;
+                }
+            }
+            else
+            {
+                doorObj = new GameObject("entrance: "+randomDir + randomOri.ToString());
+                newNumberOfExits = CreateDoor(doorObj, doorDir, newNumberOfExits);
+            }
+            directionsUsed.Add(randomDir);
+            doorObj.transform.SetParent(room.transform);
+            RotateToDir(doorObj, randomDir);
         }
-        return newMaxNuberOfExits;
+
+        return newNumberOfExits;
     }
 
     private void Start()
     {
-        CreateRoom(RoomDir.South_LR, 0);
+        Debug.Log("starting");
+     
+        System.Array dirValues = System.Enum.GetValues(typeof(RoomDir));
+        RoomDir randomDir = (RoomDir)dirValues.GetValue(Random.Range(1,dirValues.Length - 2));
+        GameObject room = CreateRoom(randomDir, 0);
+        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        room = CreateRoom(randomDir, 1);
+        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        room = CreateRoom(randomDir, 2);
+        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        room = CreateRoom(randomDir, 3);
+        /*randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        room = CreateRoom(randomDir, 4);
+        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        room = CreateRoom(randomDir, 5);
+        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        room = CreateRoom(randomDir, 6);
+        randomDir = (RoomDir)dirValues.GetValue(Random.Range(1, dirValues.Length - 2));
+        room = CreateRoom(randomDir, 7);
+    */
     }
 }
