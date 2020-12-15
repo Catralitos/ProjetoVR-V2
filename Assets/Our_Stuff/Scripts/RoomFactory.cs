@@ -25,6 +25,15 @@ public class RoomFactory : MonoBehaviour
 
         //TO-DO
         //compare method
+        public static bool operator ==(RoomDirection dir1, RoomDirection dir2)
+        {
+            return (dir1.dir == dir2.dir && dir1.ori == dir2.ori);
+        }
+
+        public static bool operator !=(RoomDirection dir1, RoomDirection dir2)
+        {
+            return !(dir1.dir == dir2.dir && dir1.ori == dir2.ori);
+        }
     }
     private Dictionary<RoomDir, RoomDirection> DirToDirMap = new Dictionary<RoomDir, RoomDirection>() 
     {
@@ -56,29 +65,50 @@ public class RoomFactory : MonoBehaviour
     public GameObject InnerWall;
     public GameObject Door;
 
+
+    private void SetTeleporterDir(RoomDirection direction, GameObject teleporter)
+    {
+        foreach (KeyValuePair<RoomDir, RoomDirection> rd in DirToDirMap)
+        {
+            if (rd.Value == direction)
+            {
+                teleporter.GetComponentInChildren<Teleporter>().direction = rd.Key;
+                break;
+            }
+        }
+    }
     private int CreateEntrance(RoomDirection entrance, GameObject room, int numberOfExits)
     {
         int newNumberOfExits = numberOfExits;
+        GameObject portal_L;
+        GameObject portal_R;
         GameObject entranceObj = new GameObject(entrance.dir.ToString()+entrance.ori.ToString());
         Instantiate(Door, entranceObj.transform);
         switch (entrance.ori)
         {
             case Orientation.Left:
-                Instantiate(PortalLeft, entranceObj.transform);
+                portal_L = Instantiate(PortalLeft, entranceObj.transform);
                 Instantiate(MiniWall_R,entranceObj.transform);
+                
                 break;            
             case Orientation.Right:
-                Instantiate(PortalRight, entranceObj.transform);
+                 portal_R = Instantiate(PortalRight, entranceObj.transform);
                 Instantiate(MiniWall_L, entranceObj.transform);
                 break;
             case Orientation.LeftRight:
-                Instantiate(PortalLeft, entranceObj.transform);
-                Instantiate(PortalRight, entranceObj.transform);
+                portal_L = Instantiate(PortalLeft, entranceObj.transform);
+                portal_R = Instantiate(PortalRight, entranceObj.transform);
+                RoomDirection RDir = new RoomDirection { dir = entrance.dir, ori = Orientation.RightLeft };
+                SetTeleporterDir(entrance, portal_L);
+                SetTeleporterDir(RDir, portal_R);
                 newNumberOfExits--;
                 break;
             case Orientation.RightLeft:
-                Instantiate(PortalLeft, entranceObj.transform);
-                Instantiate(PortalRight, entranceObj.transform);
+                portal_L = Instantiate(PortalLeft, entranceObj.transform);
+                portal_R = Instantiate(PortalRight, entranceObj.transform);
+                RoomDirection LDir = new RoomDirection { dir = entrance.dir, ori = Orientation.LeftRight };
+                SetTeleporterDir(entrance, portal_R);
+                SetTeleporterDir(LDir, portal_L);
                 newNumberOfExits--;
                 break;
         }
@@ -118,6 +148,7 @@ public class RoomFactory : MonoBehaviour
         RoomDirection entranceDirection = DirToDirMap[entranceDir];
         CreateEntrance(entranceDirection, room, numberOfExits);
         //TO_DO Create Exits
+
         return room;
     }
 
