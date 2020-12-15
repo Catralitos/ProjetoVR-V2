@@ -248,7 +248,7 @@ public class RoomFactory : MonoBehaviour
         return newNumberOfExits;
     }
 
-    private void Start()
+    /*private void Start()
     {
         Debug.Log("starting");
      
@@ -270,4 +270,5 @@ public class RoomFactory : MonoBehaviour
         randomDir = (RoomDir)dirValues.GetValue(UnityEngine.Random.Range(1, dirValues.Length - 2));
         room = CreateRoom(randomDir, 7);
     }
+    */
 }
