@@ -243,7 +243,7 @@ public class GenerationManager : MonoBehaviour
 
         //Dar os spawns em si
         //interactiveRoom.Data.roomInstance.transform
-        if (Instantiate(interactivePrefab, interactivePrefab.transform.position, Quaternion.identity, interactiveRoom.Data.roomInstance.transform))
+        if (Instantiate(interactivePrefab, new Vector3(0, 1, 0), Quaternion.identity, interactiveRoom.Data.roomInstance.transform))
         {
             Debug.Log("Spawned interactable in " + treeNodes.IndexOf(interactiveRoom) + " - " + interactiveRoom.Data.roomInstance);
         }
@@ -252,7 +252,7 @@ public class GenerationManager : MonoBehaviour
             Debug.Log("ERROR: Could not spawn interactable");
         }
         //goalRoom.Data.roomInstance.transform
-        if (Instantiate(goalPrefab, goalPrefab.transform.position, Quaternion.identity, goalRoom.Data.roomInstance.transform))
+        if (Instantiate(goalPrefab, new Vector3(0,1,0) , Quaternion.identity, goalRoom.Data.roomInstance.transform))
         {
             Debug.Log("Spawned goal in " + treeNodes.IndexOf(goalRoom) + " - " + goalRoom.Data.roomInstance);
         }
