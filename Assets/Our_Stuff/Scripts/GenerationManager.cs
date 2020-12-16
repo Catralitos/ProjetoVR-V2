@@ -304,7 +304,7 @@ public class GenerationManager : MonoBehaviour
     /// <param name="parent">Node pai</param>
     private void SpawnChildren(TreeNode<Room> parent)
     {
-        if (parent.IsLeaf && parent.Level <= depthLimit)
+        if (parent.IsLeaf && parent.Level <= depthLimit && parent.Data.RoomType != RoomType.Final)
         {
             List<RoomDir> directions = parent.Data.PortalPositions;
             directions.Remove(parent.Data.EntranceDirection);
@@ -363,7 +363,7 @@ public class GenerationManager : MonoBehaviour
                 {
                     //Buscar uma sala final
                     obj = factory.CreateRoom(direction, 0);
-                    type = RoomType.Room;
+                    type = RoomType.Final;
                     roomNumber++;
                 }
                 Vector2 position = GetNewPosition();
@@ -372,6 +372,7 @@ public class GenerationManager : MonoBehaviour
                     GameObject GenCorridor = Instantiate(obj, new Vector3(position.y * gridSize, 0, position.x * gridSize), Quaternion.identity, this.gameObject.transform);
                     if (GenCorridor != null)
                     {
+                        int c = 0;
                         //Passar parametros aos portais do pai para fazerem bem a ligação
                         List<Teleporter> parentPortals = parent.Data.roomInstance.GetComponent<RoomDirections>().Portals;
                         foreach (Teleporter portal in parentPortals)
@@ -381,6 +382,7 @@ public class GenerationManager : MonoBehaviour
                             {
                                 //Vai do pai para o filho
                                 portal.SetRooms(parent.Data.roomInstance, GenCorridor);
+                                c++;
                             }
                         }
 
@@ -393,8 +395,15 @@ public class GenerationManager : MonoBehaviour
                             {
                                 //Vai do filho para o pai
                                 portal.SetRooms(GenCorridor, parent.Data.roomInstance);
+                                c++;
                             }
                         }
+
+                        if (c % 2 != 0)
+                        {
+                            Debug.Log("FODEU INVESTIGA");
+                        }
+
                         TreeNode<Room> child = parent.AddChild(new Room(GenCorridor, type, direction, ice));
                         treeNodes.Add(child);
                         //Não faço no GetPosition porque só aqui é que dou spawn da sala
@@ -426,6 +435,7 @@ public class GenerationManager : MonoBehaviour
                         obj.transform.localScale = new Vector3(1, 1, 1);
                         obj.transform.position = new Vector3(position.y * gridSize, 0, position.x * gridSize);
 
+                        int c = 0;
                         //Passar parametros aos portais do pai para fazerem bem a ligação
                         List<Teleporter> parentPortals = parent.Data.roomInstance.GetComponent<RoomDirections>().Portals;
                         foreach (Teleporter portal in parentPortals)
@@ -435,6 +445,7 @@ public class GenerationManager : MonoBehaviour
                             {
                                 //Vai do pai para o filho
                                 portal.SetRooms(parent.Data.roomInstance, obj);
+                                c++;
                             }
                         }
 
@@ -447,8 +458,16 @@ public class GenerationManager : MonoBehaviour
                             {
                                 //Vai do filho para o pai
                                 portal.SetRooms(obj, parent.Data.roomInstance);
+                                c++;
                             }
                         }
+
+                        if (c % 2 != 0)
+                        {
+                            Debug.Log("FODEU INVESTIGA");
+                        }
+
+
                         TreeNode<Room> child = parent.AddChild(new Room(obj, type, direction, ice));
                         treeNodes.Add(child);
                         //Não faço no GetPosition porque só aqui é que dou spawn da sala
@@ -539,7 +558,8 @@ public class GenerationManager : MonoBehaviour
     /// <returns>Corredor final</returns>
     private GameObject GetRandomFinalCorridor(RoomDir direction)
     {
-
+        return finalCorridors[direction][UnityEngine.Random.Range(0, finalCorridors[direction].Count)];
+        /*
         int c = 0;
         while (c < 1000) {
 
@@ -551,7 +571,7 @@ public class GenerationManager : MonoBehaviour
             c++;
         }
 
-        return null;
+        return null;*/
     }
 
     /// <summary>
