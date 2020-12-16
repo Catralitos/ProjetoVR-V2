@@ -88,14 +88,15 @@ public class GenerationManager : MonoBehaviour
             else*/
             if (roomLists[i].roomType == RoomType.Corridor)
             {
-                /*if (roomLists[i].IceRooms)
+                if (roomLists[i].IceRooms)
                 {
-                    iceCorridors.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+                    //iceCorridors.Add(roomLists[i].roomDirection, roomLists[i].rooms);
+                    //do nothing
                 }
                 else
-                {*/
+                {
                 corridors.Add(roomLists[i].roomDirection, roomLists[i].rooms);
-                //}
+                }
             }
             /*
             else if (roomLists[i].roomType == RoomType.Final)
@@ -114,7 +115,7 @@ public class GenerationManager : MonoBehaviour
     {
         if (depthLimit > 1)
         {
-            RoomFactory factory = this.GetComponent<RoomFactory>();
+            factory = this.GetComponent<RoomFactory>();
 
             RoomDir dir = RandomEnum<RoomDir>();
 
@@ -301,7 +302,7 @@ public class GenerationManager : MonoBehaviour
     /// <param name="parent">Node pai</param>
     private void SpawnChildren(TreeNode<Room> parent)
     {
-        if (parent.IsLeaf)
+        if (parent.IsLeaf && parent.Level <= depthLimit)
         {
             List<RoomDir> directions = parent.Data.PortalPositions;
             directions.Remove(parent.Data.EntranceDirection);
@@ -315,7 +316,7 @@ public class GenerationManager : MonoBehaviour
                 {
                     //Se a sala for a penultima em depth nao pode dar spawn de uma sala final a seguir
                     //Logo dá spawn de um corredor final
-                    if (parent.Level == depthLimit - 1 || parent.Level == depthLimit - 2)
+                    if (parent.Level == depthLimit - 2 || parent.Level == depthLimit - 3)
                     {
                         obj = GetRandomFinalCorridor(direction);
                         type = RoomType.FinalCorridor;
@@ -535,7 +536,19 @@ public class GenerationManager : MonoBehaviour
     /// <returns>Corredor final</returns>
     private GameObject GetRandomFinalCorridor(RoomDir direction)
     {
-        return finalCorridors[direction][UnityEngine.Random.Range(0, finalCorridors[direction].Count)];
+
+        int c = 0;
+        while (c < 1000) {
+
+            GameObject corridor = corridors[direction][UnityEngine.Random.Range(0, corridors[direction].Count)];
+            if (!corridor.GetComponent<RoomDirections>().PortalPositions.Contains(RoomDir.C))
+            {
+                return corridor;
+            }
+            c++;
+        }
+
+        return null;
     }
 
     /// <summary>

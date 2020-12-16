@@ -121,6 +121,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &659329419 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3947991578300747477, guid: 9a3efd83197da814eafe795f0da556c0,
+    type: 3}
+  m_PrefabInstance: {fileID: 3947991578703021470}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &659329422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659329419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 922da93289cd3534cadcbaeba5b74a9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BaseStructure: {fileID: 5479955788217136744, guid: 37eb0f3383e275f439de43ac6238b720,
+    type: 3}
+  PortalRight: {fileID: 1345775414408982041, guid: c8df91055c6ac5a4092684c7450d5683,
+    type: 3}
+  PortalLeft: {fileID: 4631580092856918044, guid: 488a890a9e65e804c8d1412b9769b18e,
+    type: 3}
+  MiniWall_R: {fileID: 6552342835353979763, guid: 812bd7f765509834dba07aa620f665b9,
+    type: 3}
+  MiniWall_L: {fileID: 504913626589222342, guid: 45e2bbd97391fe84cbe1e48d28fca8db,
+    type: 3}
+  InnerWall: {fileID: 7394685699027875175, guid: bcd0f3ee1db8a944589e431df2d634f1,
+    type: 3}
+  Door: {fileID: 9221652638745405243, guid: 5067bc2bafbeb754bb81e5ef8b2c1afd, type: 3}
 --- !u!1 &930361828
 GameObject:
   m_ObjectHideFlags: 0
@@ -790,6 +821,12 @@ PrefabInstance:
       propertyPath: iceRoot
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3947991578300747474, guid: 9a3efd83197da814eafe795f0da556c0,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 6397319338274291430, guid: 92b261e1059ed9045bfc9c52e6df9940,
+        type: 3}
     - target: {fileID: 3947991578300747475, guid: 9a3efd83197da814eafe795f0da556c0,
         type: 3}
       propertyPath: m_LocalPosition.x
