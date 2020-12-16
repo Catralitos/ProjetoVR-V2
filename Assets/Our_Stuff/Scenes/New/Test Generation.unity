@@ -832,6 +832,11 @@ PrefabInstance:
       propertyPath: depthLimit
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 3947991578300747474, guid: 9a3efd83197da814eafe795f0da556c0,
+        type: 3}
+      propertyPath: distanceFactor
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3947991578300747475, guid: 9a3efd83197da814eafe795f0da556c0,
         type: 3}
       propertyPath: m_LocalPosition.x

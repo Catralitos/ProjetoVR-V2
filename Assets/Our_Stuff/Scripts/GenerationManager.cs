@@ -149,7 +149,7 @@ public class GenerationManager : MonoBehaviour
             SpawnChildren(treeRoot);
 
             //Dar spawn dos interactables
-            //SpawnInteractables();
+            SpawnInteractables();
 
             //Desativar o mapa nao necessário
             GarbageCleanup(treeRoot);
@@ -167,7 +167,7 @@ public class GenerationManager : MonoBehaviour
         Type type = typeof(RoomDir);
         Array values = Enum.GetValues(type);
 
-        object value = values.GetValue(UnityEngine.Random.Range(1, values.Length));
+        object value = values.GetValue(UnityEngine.Random.Range(1, values.Length - 1));
         return (RoomDir)Convert.ChangeType(value, type);
 
     }
@@ -185,7 +185,7 @@ public class GenerationManager : MonoBehaviour
             int c = 0;
             while (interactiveRoom == null && c < 1000)
             {
-                TreeNode<Room> aux = firstBlock[UnityEngine.Random.Range(0, firstBlock.Count)];
+                TreeNode<Room> aux = firstBlock[UnityEngine.Random.Range(1, firstBlock.Count)];
                 if (aux.Data.RoomType == RoomType.Room || aux.Data.RoomType == RoomType.Final)
                 {
                     interactiveRoom = aux;
@@ -215,7 +215,7 @@ public class GenerationManager : MonoBehaviour
             int c = 0;
             while (interactiveRoom == null && c < 1000)
             {
-                TreeNode<Room> aux = treeNodes[UnityEngine.Random.Range(0, treeNodes.Count)];
+                TreeNode<Room> aux = treeNodes[UnityEngine.Random.Range(1, treeNodes.Count)];
                 if (aux.Data.RoomType == RoomType.Room || aux.Data.RoomType == RoomType.Final)
                 {
                     interactiveRoom = aux;
@@ -230,7 +230,7 @@ public class GenerationManager : MonoBehaviour
             while (goalRoom == null && c < 1000)
             {
                 TreeNode<Room> aux = treeNodes[UnityEngine.Random.Range(0, treeNodes.Count)];
-                if (aux.Data.RoomType == RoomType.Room || aux.Data.RoomType == RoomType.Final)
+                if (aux != interactiveRoom && (aux.Data.RoomType == RoomType.Room || aux.Data.RoomType == RoomType.Final))
                 {
                     goalRoom = aux;
                 }
@@ -242,7 +242,8 @@ public class GenerationManager : MonoBehaviour
         }
 
         //Dar os spawns em si
-        if (Instantiate(interactivePrefab, Vector3.zero, Quaternion.identity, interactiveRoom.Data.roomInstance.transform))
+        //interactiveRoom.Data.roomInstance.transform
+        if (Instantiate(interactivePrefab, interactivePrefab.transform.position, Quaternion.identity, interactiveRoom.Data.roomInstance.transform))
         {
             Debug.Log("Spawned interactable in " + treeNodes.IndexOf(interactiveRoom) + " - " + interactiveRoom.Data.roomInstance);
         }
@@ -250,8 +251,8 @@ public class GenerationManager : MonoBehaviour
         {
             Debug.Log("ERROR: Could not spawn interactable");
         }
-
-        if (Instantiate(goalPrefab, Vector3.zero, Quaternion.identity, goalRoom.Data.roomInstance.transform))
+        //goalRoom.Data.roomInstance.transform
+        if (Instantiate(goalPrefab, goalPrefab.transform.position, Quaternion.identity, goalRoom.Data.roomInstance.transform))
         {
             Debug.Log("Spawned goal in " + treeNodes.IndexOf(goalRoom) + " - " + goalRoom.Data.roomInstance);
         }
