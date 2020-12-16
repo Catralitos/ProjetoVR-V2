@@ -58,7 +58,8 @@ public class GenerationManager : MonoBehaviour
     //Se for 2, por exemplo, em principio ficam em lados opostos da árvore
     [Range(1, 10)]
     public int distanceFactor = 2;
-
+    [Range(1, 7)]
+    public int maxNumExits = 2;
     //Numero a imprimir na sala;
     private int roomNumber = 1;
 
@@ -120,12 +121,12 @@ public class GenerationManager : MonoBehaviour
             RoomDir dir = RandomEnum<RoomDir>();
 
             //Escolher primeira sala aleatoriamente
-            GameObject firstRoom = factory.CreateRoom(dir, UnityEngine.Random.Range(1, 8));
+            GameObject firstRoom = factory.CreateRoom(dir, UnityEngine.Random.Range(1, maxNumExits + 1));
 
             //Meter na posição certa
             //GameObject aux = Instantiate(firstRoom, Vector3.zero, Quaternion.identity, this.gameObject.transform);
             firstRoom.transform.SetParent(this.gameObject.transform);
-
+            firstRoom.transform.localScale = new Vector3(1, 1, 1);
 
             //Criar raiz da árvore (depois de instanciar, porque instancia != prefab e porque só se cria o node se instanciar bem)
             treeRoot = new TreeNode<Room>(new Room(firstRoom, RoomType.Room, RoomDir.Root, iceRoot));
@@ -148,7 +149,7 @@ public class GenerationManager : MonoBehaviour
             SpawnChildren(treeRoot);
 
             //Dar spawn dos interactables
-            SpawnInteractables();
+            //SpawnInteractables();
 
             //Desativar o mapa nao necessário
             GarbageCleanup(treeRoot);
@@ -351,7 +352,7 @@ public class GenerationManager : MonoBehaviour
                     //Se não for de gelo não liga
                     else
                     {*/
-                        obj = factory.CreateRoom(direction, UnityEngine.Random.Range(1, 8));
+                        obj = factory.CreateRoom(direction, UnityEngine.Random.Range(1, maxNumExits + 1));
                         type = RoomType.Room;
                         roomNumber++;
                     //}
@@ -421,6 +422,7 @@ public class GenerationManager : MonoBehaviour
                     if (obj != null)
                     {
                         obj.transform.SetParent(this.gameObject.transform);
+                        obj.transform.localScale = new Vector3(1, 1, 1);
                         obj.transform.position = new Vector3(position.y * gridSize, 0, position.x * gridSize);
 
                         //Passar parametros aos portais do pai para fazerem bem a ligação
