@@ -914,7 +914,7 @@ PrefabInstance:
         type: 3}
       propertyPath: interactivePrefab
       value: 
-      objectReference: {fileID: 8122491785046079762, guid: 2dca254e12a127342a6b0c189394656a,
+      objectReference: {fileID: 4884499637820425690, guid: 200d7ce5262100b46870c241ce2ba1fe,
         type: 3}
     - target: {fileID: 3947991578300747474, guid: 9a3efd83197da814eafe795f0da556c0,
         type: 3}
@@ -2338,6 +2338,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 5250276174300456078, guid: 1a19d15e8554e7e40bf005538dc1a25d,
         type: 3}
+    - target: {fileID: 3947991578300747474, guid: 9a3efd83197da814eafe795f0da556c0,
+        type: 3}
+      propertyPath: goalPrefab
+      value: 
+      objectReference: {fileID: 6145626341052776518, guid: 539813d93ae67ee49932d3709e39df07,
+        type: 3}
+    - target: {fileID: 3947991578300747474, guid: 9a3efd83197da814eafe795f0da556c0,
+        type: 3}
+      propertyPath: maxNumExits
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 3947991578300747475, guid: 9a3efd83197da814eafe795f0da556c0,
         type: 3}
       propertyPath: m_LocalPosition.x
