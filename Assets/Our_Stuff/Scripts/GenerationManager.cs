@@ -140,7 +140,7 @@ public class GenerationManager : MonoBehaviour
             */
 
             //Instanciar o player (vai ter que ser depois de instanciar a sala, não podemos pô-lo na cena no editor)
-            _ = Instantiate(player, new Vector3(0, 0.5f, 0), Quaternion.identity);
+            _ = Instantiate(player, new Vector3(0, 0, 0), Quaternion.identity);
 
             //Guardar a posição ocupada pela sala
             roomPositions.Add(Vector2.zero);
@@ -243,16 +243,17 @@ public class GenerationManager : MonoBehaviour
 
         //Dar os spawns em si
         //interactiveRoom.Data.roomInstance.transform
-        if (Instantiate(interactivePrefab, new Vector3(0, 1, 0), Quaternion.identity, interactiveRoom.Data.roomInstance.transform))
+        GameObject interactable = Instantiate(interactivePrefab, interactiveRoom.Data.roomInstance.transform);
+        /*if (Instantiate(interactivePrefab,  interactiveRoom.Data.roomInstance.transform))
         {
             Debug.Log("Spawned interactable in " + treeNodes.IndexOf(interactiveRoom) + " - " + interactiveRoom.Data.roomInstance);
         }
         else
         {
             Debug.Log("ERROR: Could not spawn interactable");
-        }
+        }*/
         //goalRoom.Data.roomInstance.transform
-        if (Instantiate(goalPrefab, new Vector3(0,1,0) , Quaternion.identity, goalRoom.Data.roomInstance.transform))
+        if (Instantiate(goalPrefab, goalRoom.Data.roomInstance.transform))
         {
             Debug.Log("Spawned goal in " + treeNodes.IndexOf(goalRoom) + " - " + goalRoom.Data.roomInstance);
         }
