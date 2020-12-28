@@ -83,6 +83,7 @@ public class Generator : MonoBehaviour
         {
             this.id = id;
             this.properties = properties;
+            node = new GameObject("Room: " + depth + " | " + id);
             GenerateCorridors(corridor, corridorPos);
         }
 
@@ -119,8 +120,10 @@ public class Generator : MonoBehaviour
             int way = 1;
             if (entrance % 2 == 0)
                 way = -1;
+            entrance = Wrap(entrance);
             id += entrance;
             entrance -= way;
+            entrance = Wrap(entrance);
 
             CreateOuterShell();
             CreateEntrance(true, entrance, way);
@@ -137,6 +140,7 @@ public class Generator : MonoBehaviour
             if (entrance % 2 == 0)
                 way = -1;
             entrance -= way;
+            entrance = Wrap(entrance);
             id += entrance;
             corridorsRemaining--;
             CreateOuterShell();
@@ -154,7 +158,7 @@ public class Generator : MonoBehaviour
             {
                 int position = entrance + i * way;
                 position = Wrap(position);
-                if (idToCopy[position] == 0)
+                if (int.Parse(idToCopy[position].ToString()) == 0)
                 {
                     miniWalls += position;
                     if (position % 2 == 0)
@@ -171,7 +175,9 @@ public class Generator : MonoBehaviour
                     miniWalls += -1;
                 }
             }
-            if (miniWalls[1] != -1 && miniWalls[2] != -1)
+            Rotate(GameObject.Instantiate(generator.innerMaterials[propertiesToCopy].innerDoorframe, node.transform), Wrap(entrance));
+
+            if (int.Parse(miniWalls[1].ToString()) != -1 && int.Parse(miniWalls[2].ToString()) != -1)
             {
                 Rotate(GameObject.Instantiate(generator.innerMaterials[propertiesToCopy].innerWalls, node.transform), Wrap(entrance + way * 2));
             }
@@ -239,14 +245,14 @@ public class Generator : MonoBehaviour
                 CopyRoomFeatures(destination.id, ((Room)destination).properties, exit, -way);
                 if (isSingle)
                 {
-
+                    //TO-DO Triger that changes inner floor
                 }
             }
             else
             {
                 PopulateWalls(exit, way);
             }
-            SetPortal(id[1], destination.node);
+            SetPortal(int.Parse(id[1].ToString()), destination.node);
         }
 
        
@@ -257,7 +263,7 @@ public class Generator : MonoBehaviour
             if (corridorsRemaining == 0)
             {
                 int destinationDepth = depth + 1;
-                exit = entrance + 2 * way;
+                exit = Wrap(entrance + 2 * way);
                 id += exit;
                 string roomId = "";
                 for (int i = 0; i < 8; i++)
@@ -275,9 +281,9 @@ public class Generator : MonoBehaviour
             }
             else
             {
-                exit = entrance + 3 * way;
+                exit = Wrap(entrance + 3 * way);
                 id += exit;
-                destination = new Corridor(this, exit, corridorsRemaining - 1);
+                destination = new Corridor(this, exit, corridorsRemaining);
                 CreateExit(false, exit, way, false);
             }
         }
