@@ -104,7 +104,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3144676349691203877}
   m_Layer: 0
-  m_Name: MiniWall
+  m_Name: MiniWall_Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
