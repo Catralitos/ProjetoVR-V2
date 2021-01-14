@@ -272,7 +272,8 @@ MonoBehaviour:
       type: 3}
     hasSpecialEffects: 0
     specialEffects: {fileID: 0}
-  maxDepth: 3
+  maxDepth: 2
+  roomDistance: 5
 --- !u!4 &814813291
 Transform:
   m_ObjectHideFlags: 0
