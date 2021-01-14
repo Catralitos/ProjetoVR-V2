@@ -42,7 +42,7 @@ public class Generator : MonoBehaviour
     public class Node
     {
         public GameObject node;
-        public string id;
+        public int[] id;
         public int depth;
 
         protected void CreateOuterShell()
@@ -50,6 +50,15 @@ public class Generator : MonoBehaviour
             GameObject.Instantiate(generator.roof, node.transform);
             GameObject.Instantiate(generator.outerFloor, node.transform);
             GameObject.Instantiate(generator.outerWalls, node.transform);
+        }
+
+        protected string idToString()
+        {
+            string idString = "";
+            foreach(int i in id){
+                idString += i;
+            }
+            return idString;
         }
     }
 
@@ -61,29 +70,29 @@ public class Generator : MonoBehaviour
         public Room()
         {
             depth = 0;
-            id = "";
+            id = new int[8];
             for (int i = 0; i < 8; i++)
             {
                 float rngVal = Random.value;
                 if (rngVal > 0.5f)
                 {
-                    id += 1;
+                    id[i]=1;
                 }
                 else
                 {
-                    id += 0;
+                    id[i] = 0;
                 }
             }
-            node = new GameObject("Room: " + depth + " | " + id);
+            node = new GameObject("Room: " + depth + " | " + idToString());
             properties = (int)(Random.value * (generator.innerMaterials.Count - 1));
             GenerateCorridors(null, -1);
         }
 
-        public Room(string id, int properties, Corridor corridor, int corridorPos, int depth)
+        public Room(int[] id, int properties, Corridor corridor, int corridorPos, int depth)
         {
             this.id = id;
             this.properties = properties;
-            node = new GameObject("Room: " + depth + " | " + id);
+            node = new GameObject("Room: " + depth + " | " + idToString()); 
             GenerateCorridors(corridor, corridorPos);
         }
 
@@ -115,13 +124,14 @@ public class Generator : MonoBehaviour
 
         public Corridor(Room room, int entrance)
         {
+            id = new int[2];
             origin = room;
             node = new GameObject("");
             int way = 1;
             if (entrance % 2 == 0)
                 way = -1;
             entrance = Wrap(entrance);
-            id += entrance;
+            id[0] =  entrance;
             entrance -= way;
             entrance = Wrap(entrance);
 
@@ -129,11 +139,12 @@ public class Generator : MonoBehaviour
             CreateEntrance(true, entrance, way);
             int corridorsRemaining = (int)(Random.value * 3);
             GenerateDestination(corridorsRemaining, entrance, way,true);
-            node.name = "corridor: " + id;
+            node.name = "corridor: " + idToString();
         }
 
         public Corridor(Corridor corridor, int entrance, int corridorsRemaining)
         {
+            id = new int[2];
             origin = corridor;
             node = new GameObject("");
             int way = 1;
@@ -141,49 +152,49 @@ public class Generator : MonoBehaviour
                 way = -1;
             entrance -= way;
             entrance = Wrap(entrance);
-            id += entrance;
+            id[0] = entrance;
             corridorsRemaining--;
             CreateOuterShell();
             CreateEntrance(false, entrance, way);
 
             GenerateDestination(corridorsRemaining, entrance, way);
 
-            node.name = "corridor: " + id;
+            node.name = "corridor: " + idToString();
         }
 
-        private void CopyRoomFeatures(string idToCopy, int propertiesToCopy,int entrance, int way)
+        private void CopyRoomFeatures(int[] idToCopy, int propertiesToCopy,int entrance, int way)
         {
-            string miniWalls = "";
+            int[] miniWalls = new int[3];
             for (int i = 1; i < 4; i++)
             {
                 int position = entrance + i * way;
                 position = Wrap(position);
-                if (int.Parse(idToCopy[position].ToString()) == 0)
+                if (idToCopy[position] == 0)
                 {
-                    miniWalls += position;
+                    miniWalls[i - 1] = position;
                     if (position % 2 == 0)
                     {
-                        Rotate(GameObject.Instantiate(generator.miniWallEven, node.transform), position);
+                        generator.Rotate(GameObject.Instantiate(generator.miniWallEven, node.transform), position);
                     }
                     else
                     {
-                        Rotate(GameObject.Instantiate(generator.miniWallOdd, node.transform), position);
+                        generator.Rotate(GameObject.Instantiate(generator.miniWallOdd, node.transform), position);
                     }
                 }
                 else
                 {
-                    miniWalls += -1;
+                    miniWalls[i - 1] = -1;
                 }
             }
-            Rotate(GameObject.Instantiate(generator.innerMaterials[propertiesToCopy].innerDoorframe, node.transform), Wrap(entrance));
-
-            if (int.Parse(miniWalls[1].ToString()) != -1 && int.Parse(miniWalls[2].ToString()) != -1)
+            generator.Rotate(GameObject.Instantiate(generator.innerMaterials[propertiesToCopy].innerDoorframe, node.transform), Wrap(entrance));
+            Debug.Log(miniWalls);
+            if (miniWalls[1] > -1 && miniWalls[2] > -1)
             {
-                Rotate(GameObject.Instantiate(generator.innerMaterials[propertiesToCopy].innerWalls, node.transform), Wrap(entrance + way * 2));
+                generator.Rotate(GameObject.Instantiate(generator.innerMaterials[propertiesToCopy].innerWalls, node.transform), Wrap(entrance + way * 2));
             }
             else
             {
-                Rotate(GameObject.Instantiate(generator.innerMaterials[propertiesToCopy].innerDoorframe, node.transform), Wrap(entrance + way * 2));
+                generator.Rotate(GameObject.Instantiate(generator.innerMaterials[propertiesToCopy].innerDoorframe, node.transform), Wrap(entrance + way * 2));
             }
         }
 
@@ -207,37 +218,6 @@ public class Generator : MonoBehaviour
             SetPortal(id[0], origin.node);
         }
 
-        private void PopulateWalls(int startPosition, int way)
-        {
-            Rotate(GameObject.Instantiate(generator.corridorInnerWalls, node.transform), Wrap(startPosition + way * 0));
-            Rotate(GameObject.Instantiate(generator.corridorInnerWalls, node.transform), Wrap(startPosition + way * 2));
-        }
-
-        private void Rotate(GameObject obj, int position)
-        {
-            switch (position)
-            {
-                case 0:
-                case 1:
-                    break;
-                case 2:
-                case 3:
-                    obj.transform.Rotate(new Vector3(0, 90, 0));
-                    break;
-                case 4:
-                case 5:
-                    obj.transform.Rotate(new Vector3(0, 180, 0));
-                    break;
-                case 6:
-                case 7:
-                    obj.transform.Rotate(new Vector3(0, 270, 0));
-                    break;
-                default:
-                    obj.transform.Rotate(new Vector3(0, 45, 0));
-                    break;
-            }
-        }
-
         private void CreateExit(bool destinationISRoom, int exit, int way, bool isSingle = false)
         {
             if (destinationISRoom)
@@ -255,6 +235,16 @@ public class Generator : MonoBehaviour
             SetPortal(int.Parse(id[1].ToString()), destination.node);
         }
 
+        private void PopulateWalls(int startPosition, int way)
+        {
+            generator.Rotate(GameObject.Instantiate(generator.corridorInnerWalls, node.transform), Wrap(startPosition + way * 0));
+            generator.Rotate(GameObject.Instantiate(generator.corridorInnerWalls, node.transform), Wrap(startPosition + way * 2));
+        }
+
+       
+
+        
+
        
 
         private void GenerateDestination(int corridorsRemaining, int entrance, int way, bool isSingle = false)
@@ -264,16 +254,16 @@ public class Generator : MonoBehaviour
             {
                 int destinationDepth = depth + 1;
                 exit = Wrap(entrance + 2 * way);
-                id += exit;
-                string roomId = "";
+                id[1] = exit;
+                int[] roomId = new int[8];
                 for (int i = 0; i < 8; i++)
                 {
                     if (i == exit)
-                        roomId += 1;
+                        roomId[i] = 1;
                     else if (destinationDepth < generator.maxDepth)
-                        roomId += (int)Random.value;
+                        roomId[i] = (int)Random.value;
                     else
-                        roomId += 0;
+                        roomId[i] = 0;
                 }
                 int roomProperties = (int)(Random.value * (generator.innerMaterials.Count - 1));
                 destination = new Room(roomId, roomProperties, this, exit, destinationDepth);
@@ -282,7 +272,7 @@ public class Generator : MonoBehaviour
             else
             {
                 exit = Wrap(entrance + 3 * way);
-                id += exit;
+                id[1] = exit;
                 destination = new Corridor(this, exit, corridorsRemaining);
                 CreateExit(false, exit, way, false);
             }
@@ -301,6 +291,46 @@ public class Generator : MonoBehaviour
             return position;
         }
 
+    }
+
+    public void Rotate(GameObject obj, int position)
+    {
+        switch (position)
+        {
+            case 0:
+            case 1:
+                Debug.Log("_____________");
+                Debug.Log(position);
+                Debug.Log("(0, 0, 0)");
+                break;
+            case 2:
+            case 3:
+                obj.transform.Rotate(new Vector3(0, 90, 0));
+                Debug.Log("_____________");
+                Debug.Log(position);
+                Debug.Log("(0, 90, 0)");
+                break;
+            case 4:
+            case 5:
+                obj.transform.Rotate(new Vector3(0, 180, 0));
+                Debug.Log("_____________");
+                Debug.Log(position);
+                Debug.Log("(0, 180, 0)");
+                break;
+            case 6:
+            case 7:
+                obj.transform.Rotate(new Vector3(0, -90, 0));
+                Debug.Log("_____________");
+                Debug.Log(position);
+                Debug.Log("(0, -90, 0)");
+                break;
+            default:
+                obj.transform.Rotate(new Vector3(0, 45, 0));
+                Debug.Log("_____________");
+                Debug.Log(position);
+                Debug.Log("(0, 45, 0)");
+                break;
+        }
     }
 
     private void Start()
