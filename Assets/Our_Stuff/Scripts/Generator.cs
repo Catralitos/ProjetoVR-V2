@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Generator : MonoBehaviour
@@ -10,7 +11,7 @@ public class Generator : MonoBehaviour
     {
         generator = this;
     }
-
+    public int seed;
     public GameObject roof;
     public GameObject outerFloor;
     public GameObject outerWalls;
@@ -86,6 +87,8 @@ public class Generator : MonoBehaviour
             node = new GameObject("Room: " + depth + " | " + idToString());
             properties = (int)(Random.value * (generator.innerMaterials.Count - 1));
             GenerateCorridors(null, -1);
+            CreateOuterShell();
+            PopulateRoom(id, properties);
         }
 
         public Room(int[] id, int properties, Corridor corridor, int corridorPos, int depth)
@@ -94,6 +97,44 @@ public class Generator : MonoBehaviour
             this.properties = properties;
             node = new GameObject("Room: " + depth + " | " + idToString()); 
             GenerateCorridors(corridor, corridorPos);
+            CreateOuterShell();
+            PopulateRoom(id, properties);
+        }
+
+        private void PopulateRoom(int[] id, int properties)
+        {
+            int[] hasDoor = new int[id.Length];
+            for (int i = 0; i < id.Length; i += 2)
+            {
+                if(id[i] == 1 || id[i+1] == 1)
+                {
+                    hasDoor[i] = 1;
+                    hasDoor[i+1] = 1;
+                    generator.Rotate(GameObject.Instantiate(generator.innerMaterials[properties].innerDoorframe, node.transform), i);
+                }
+                else
+                {
+                    hasDoor[i] = 0;
+                    hasDoor[i + 1] = 0;
+                    generator.Rotate(GameObject.Instantiate(generator.innerMaterials[properties].innerWalls, node.transform), i);
+
+                }
+            }
+            for(int i = 0; i < id.Length; i++)
+            {
+                if(id[i] != hasDoor[i])
+                {
+                    if(i % 2 == 0)
+                    {
+                        generator.Rotate(GameObject.Instantiate(generator.miniWallEven, node.transform), i);
+                    }
+                    else
+                    {
+                        generator.Rotate(GameObject.Instantiate(generator.miniWallOdd, node.transform), i);
+
+                    }
+                }
+            }
         }
 
         private void GenerateCorridors(Corridor corridor, int corridorPos)
@@ -165,13 +206,14 @@ public class Generator : MonoBehaviour
         private void CopyRoomFeatures(int[] idToCopy, int propertiesToCopy,int entrance, int way)
         {
             int[] miniWalls = new int[3];
-            for (int i = 1; i < 4; i++)
+            for (int i = 0; i < 3; i++)
             {
-                int position = entrance + i * way;
+                int position = entrance + (i * way);
                 position = Wrap(position);
                 if (idToCopy[position] == 0)
                 {
-                    miniWalls[i - 1] = position;
+
+                    miniWalls[i] = position;
                     if (position % 2 == 0)
                     {
                         generator.Rotate(GameObject.Instantiate(generator.miniWallEven, node.transform), position);
@@ -183,9 +225,17 @@ public class Generator : MonoBehaviour
                 }
                 else
                 {
-                    miniWalls[i - 1] = -1;
+                    miniWalls[i] = -1;
                 }
             }
+
+            Debug.Log("copied: ");
+            foreach(int i in idToCopy) { Debug.Log(i); }
+            Debug.Log(" stated on: "+entrance);
+            Debug.Log(" way: " + way);
+            Debug.Log(" got: ");
+            foreach (int i in miniWalls) { Debug.Log(i); }
+
             generator.Rotate(GameObject.Instantiate(generator.innerMaterials[propertiesToCopy].innerDoorframe, node.transform), Wrap(entrance));
             Debug.Log(miniWalls);
             if (miniWalls[1] > -1 && miniWalls[2] > -1)
@@ -222,7 +272,7 @@ public class Generator : MonoBehaviour
         {
             if (destinationISRoom)
             {
-                CopyRoomFeatures(destination.id, ((Room)destination).properties, exit, -way);
+                CopyRoomFeatures(destination.id, ((Room)destination).properties, exit, way);
                 if (isSingle)
                 {
                     //TO-DO Triger that changes inner floor
@@ -237,8 +287,8 @@ public class Generator : MonoBehaviour
 
         private void PopulateWalls(int startPosition, int way)
         {
-            generator.Rotate(GameObject.Instantiate(generator.corridorInnerWalls, node.transform), Wrap(startPosition + way * 0));
-            generator.Rotate(GameObject.Instantiate(generator.corridorInnerWalls, node.transform), Wrap(startPosition + way * 2));
+            generator.Rotate(GameObject.Instantiate(generator.corridorInnerWalls, node.transform), Wrap(startPosition + (way * 0)));
+            generator.Rotate(GameObject.Instantiate(generator.corridorInnerWalls, node.transform), Wrap(startPosition + (way * 2)));
         }
 
        
@@ -283,10 +333,12 @@ public class Generator : MonoBehaviour
             if (position< 0)
             {
                 position += 8;
+                return Wrap(position);
             }
             if (position > 7)
             {
                 position -= 8;
+                return Wrap(position);
             }
             return position;
         }
@@ -295,10 +347,16 @@ public class Generator : MonoBehaviour
 
     public void Rotate(GameObject obj, int position)
     {
+        Debug.Log("================================");
+        Debug.Log(obj.name);
+        Debug.Log(obj.transform.rotation.eulerAngles);
+        obj.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+        Debug.Log(obj.transform.rotation.eulerAngles);
         switch (position)
         {
             case 0:
             case 1:
+                obj.transform.Rotate(new Vector3(0, 0, 0));
                 Debug.Log("_____________");
                 Debug.Log(position);
                 Debug.Log("(0, 0, 0)");
@@ -331,10 +389,12 @@ public class Generator : MonoBehaviour
                 Debug.Log("(0, 45, 0)");
                 break;
         }
+        Debug.Log(obj.transform.rotation.eulerAngles);
     }
 
     private void Start()
     {
+        Random.InitState(seed);
         Node first = new Room();
     }
 }

@@ -243,6 +243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e643017ccd336d847b6071a5aed2fc32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  seed: 1
   roof: {fileID: 1564661492453602013, guid: 1edd2027bf67dc14d8b0e4ad54041ef8, type: 3}
   outerFloor: {fileID: 4852381273350911525, guid: f1c136d4aeea6d943bce9943137e2ddc,
     type: 3}
