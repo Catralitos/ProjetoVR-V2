@@ -25,7 +25,9 @@ public class Teleporter : MonoBehaviour
         {
             Vector3 change = DestinationRoom.transform.position - InitialRoom.transform.position;
             //Debug.Log(change);
+            DestinationRoom.SetActive(true);
             other.GetComponent<TPreference>().player.transform.position += change;
+            InitialRoom.SetActive(false);
             //GenerationManager.instance.OnPortalPass(DestinationRoom);
         }
     }

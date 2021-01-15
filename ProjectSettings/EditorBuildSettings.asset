@@ -23,9 +23,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Our_Stuff/Scenes/New/RDW_test_v2.unity
     guid: bf61d688afe552b49bcbefe8e3a4cbb8
-  - enabled: 1
+  - enabled: 0
     path: Assets/Our_Stuff/Scenes/New/Test Generation.unity
     guid: 052f513a20411ea4f8b0903c47871c58
+  - enabled: 1
+    path: Assets/Our_Stuff/Scenes/Test/Test stuff.unity
+    guid: 0b3b0b1db92e7a440af8fd084bb79c2b
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 7184da9c2cf4d8647bedbc45c55f75ee,
       type: 2}

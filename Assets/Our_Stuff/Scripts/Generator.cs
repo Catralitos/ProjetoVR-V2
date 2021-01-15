@@ -11,7 +11,11 @@ public class Generator : MonoBehaviour
     {
         generator = this;
     }
+    public GameObject flag;
+    public GameObject goal;
+    public GameObject player;
     public int seed;
+    public Vector3 roomScale = Vector3.one;
     public GameObject roof;
     public GameObject outerFloor;
     public GameObject outerWalls;
@@ -24,9 +28,10 @@ public class Generator : MonoBehaviour
     public GameObject corridorInnerWalls;
     public List<RoomProperties> innerMaterials;
     public int maxDepth;
-    public static int numberOfRooms = 0;
+    public static int numberOfRooms = -1;
     public int roomDistance = 5;
-
+    public List<Room>[] roomList;
+    public List<Node> allNodes;
     [System.Serializable]
     public struct RoomProperties
     {
@@ -49,7 +54,7 @@ public class Generator : MonoBehaviour
         public int depth;
         public bool isRoom;
        
-        protected void CreateOuterShell()
+        virtual protected void CreateOuterShell()
         {
             GameObject.Instantiate(generator.roof, node.transform);
             GameObject.Instantiate(generator.outerFloor, node.transform);
@@ -91,12 +96,24 @@ public class Generator : MonoBehaviour
                 }
             }
             node = new GameObject("Room: " + depth + " | " + idToString());
-            properties = (int)(Random.value * (generator.innerMaterials.Count - 1));
+            properties = depth;
             GenerateCorridors(null, -1);
             CreateOuterShell();
             PopulateRoom(id, properties);
+            node.transform.localScale = generator.roomScale;
+            generator.roomList[depth].Add(this);
+            generator.allNodes.Add(this);
         }
 
+        protected override void CreateOuterShell()
+        {
+            base.CreateOuterShell();
+            GameObject.Instantiate(generator.innerMaterials[properties].innerFloor, node.transform);
+            if (generator.innerMaterials[properties].hasSpecialEffects)
+            {
+                GameObject.Instantiate(generator.innerMaterials[properties].specialEffects, node.transform);
+            }
+        }
         public Room(int[] id, int properties, Corridor corridor, int corridorPos, int depth)
         {
             this.depth = depth;
@@ -107,6 +124,10 @@ public class Generator : MonoBehaviour
             GenerateCorridors(corridor, corridorPos);
             CreateOuterShell();
             PopulateRoom(id, properties);
+            node.transform.localScale = generator.roomScale;
+            generator.roomList[depth].Add(this);
+            generator.allNodes.Add(this);
+
         }
         override public void Move()
         {
@@ -199,11 +220,12 @@ public class Generator : MonoBehaviour
     {
         public Node origin;
         public Node destination;
+        public GameObject[] floors;
 
         public Corridor(Room room, int entrance)
         {
             isRoom = false;
-
+            floors = new GameObject[2];
             id = new int[2];
             origin = room;
             node = new GameObject("");
@@ -220,12 +242,15 @@ public class Generator : MonoBehaviour
             int corridorsRemaining = (int)(Random.value * 3);
             GenerateDestination(corridorsRemaining, entrance, way,true);
             node.name = "corridor: " + idToString();
+            node.transform.localScale = generator.roomScale;
+            generator.allNodes.Add(this);
+
         }
 
         public Corridor(Corridor corridor, int entrance, int corridorsRemaining)
         {
             isRoom = false;
-
+            floors = new GameObject[2];
             id = new int[2];
             origin = corridor;
             node = new GameObject("");
@@ -242,10 +267,14 @@ public class Generator : MonoBehaviour
             GenerateDestination(corridorsRemaining, entrance, way);
 
             node.name = "corridor: " + idToString();
+            node.transform.localScale = generator.roomScale;
+            generator.allNodes.Add(this);
+
         }
 
-        private void CopyRoomFeatures(int[] idToCopy, int propertiesToCopy,int entrance, int way)
+        private void CopyRoomFeatures(int[] idToCopy, int propertiesToCopy,int entrance, int way,int inOut)
         {
+            floors[inOut] = GameObject.Instantiate(generator.innerMaterials[propertiesToCopy].innerFloor, node.transform);
             int[] miniWalls = new int[3];
             for (int i = 0; i < 3; i++)
             {
@@ -305,7 +334,7 @@ public class Generator : MonoBehaviour
             depth = origin.depth;
             if (originIsRoom)
             {
-                CopyRoomFeatures(origin.id,((Room)origin).properties, entrance, -way);
+                CopyRoomFeatures(origin.id,((Room)origin).properties, entrance, -way,0);
                
             }
             else
@@ -319,7 +348,7 @@ public class Generator : MonoBehaviour
         {
             if (destinationISRoom)
             {
-                CopyRoomFeatures(destination.id, ((Room)destination).properties, exit, way);
+                CopyRoomFeatures(destination.id, ((Room)destination).properties, exit, way,1);
                 if (isSingle)
                 {
                     //TO-DO Triger that changes inner floor
@@ -374,7 +403,7 @@ public class Generator : MonoBehaviour
                         roomId[i] = 0;
                     }
                 }
-                int roomProperties = (int)(Random.value * (generator.innerMaterials.Count - 1));
+                int roomProperties = destinationDepth;
                 destination = new Room(roomId, roomProperties, this, exit, destinationDepth);
                 CreateExit(true, exit, way, isSingle);
             }
@@ -467,8 +496,37 @@ public class Generator : MonoBehaviour
     }
     private void Start()
     {
+        player.SetActive(false);
+        maxDepth = innerMaterials.Count-1;
+        Debug.Log(innerMaterials.Count);
+        roomList = new List<Room>[innerMaterials.Count];
+        for(int i = 0; i != innerMaterials.Count; i++)
+        {
+            roomList[i] = new List<Room>();
+        }
+        allNodes = new List<Node>();
         Random.InitState(seed);
         Node first = new Room();
         first.Move();
+        for (int i = 0; i != innerMaterials.Count; i++)
+        {
+            Debug.Log("depth: " + i);
+            foreach( Room r in roomList[i])
+            {
+                Debug.Log(r.node.name);
+            }
+        }
+        int temp = Random.Range(0, roomList.Length);
+        GameObject.Instantiate(flag, roomList[temp][Random.Range(0, roomList[temp].Count)].node.transform);
+        temp = Random.Range(0, roomList.Length);
+        GameObject.Instantiate(goal, roomList[temp][Random.Range(0, roomList[temp].Count)].node.transform);
+        foreach (Node n in allNodes)
+        {
+            n.node.SetActive(false);
+        }
+        first.node.SetActive(true);
+        player.SetActive(true);
+       
     }
+
 }
